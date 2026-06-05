@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GitHub Copilot – Included Models Reference</title>
+<script>
+  (() => {
+    const param = new URLSearchParams(window.location.search).get("clawpilotTheme");
+    const theme =
+      param || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    document.documentElement.setAttribute("data-theme", theme);
+  })();
+</script>
+<style>
+:root {
+  color-scheme: light;
+  --cp-bg: #f7f4ef;
+  --cp-bg-elevated: #fcfbf8;
+  --cp-surface: #ffffff;
+  --cp-surface-soft: #f5f5f5;
+  --cp-border: #dedede;
+  --cp-border-strong: #919191;
+  --cp-text: #242424;
+  --cp-text-muted: #5c5c5c;
+  --cp-text-soft: #6f6f6f;
+  --cp-accent: #b11f4b;
+  --cp-accent-hover: #9a1a41;
+  --cp-accent-soft: rgba(177, 31, 75, 0.08);
+  --cp-accent-fg: #ffffff;
+  --cp-success: #16a34a;
+  --cp-danger: #dc2626;
+  --cp-warning: #f59e0b;
+  --cp-link: #0078d4;
+  --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.12);
+  --cp-overlay: rgba(255, 255, 255, 0.8);
+  --cp-panel: rgba(255, 255, 255, 0.86);
+  --cp-panel-strong: rgba(255, 255, 255, 0.96);
+  --cp-sheen: rgba(255, 255, 255, 0.55);
+  --cp-highlight: rgba(177, 31, 75, 0.12);
+}
+html[data-theme="dark"] {
+  color-scheme: dark;
+  --cp-bg: #3d3b3a;
+  --cp-bg-elevated: #343231;
+  --cp-surface: #292929;
+  --cp-surface-soft: #2e2e2e;
+  --cp-border: #474747;
+  --cp-border-strong: #5f5f5f;
+  --cp-text: #dedede;
+  --cp-text-muted: #919191;
+  --cp-text-soft: #b0b0b0;
+  --cp-accent: #fd8ea1;
+  --cp-accent-hover: #fb7b91;
+  --cp-accent-soft: rgba(253, 142, 161, 0.14);
+  --cp-accent-fg: #1a1a1a;
+  --cp-success: #4ade80;
+  --cp-danger: #f87171;
+  --cp-warning: #fbbf24;
+  --cp-link: #4da6ff;
+  --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.32);
+  --cp-overlay: rgba(41, 41, 41, 0.88);
+  --cp-panel: rgba(41, 41, 41, 0.72);
+  --cp-panel-strong: rgba(41, 41, 41, 0.96);
+  --cp-sheen: rgba(255, 255, 255, 0.04);
+  --cp-highlight: rgba(253, 142, 161, 0.12);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: var(--cp-bg);
+  color: var(--cp-text);
+  font-family: "Segoe UI", Aptos, Calibri, -apple-system, BlinkMacSystemFont, sans-serif;
+  line-height: 1.6;
+  padding: 32px 16px;
+}
+
+.container { max-width: 1100px; margin: 0 auto; }
+
+/* Hero */
+.hero {
+  background: var(--cp-surface);
+  border: 1px solid var(--cp-border);
+  border-radius: 16px;
+  padding: 40px 36px;
+  margin-bottom: 24px;
+  box-shadow: 0 0 2px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.14);
+}
+.hero h1 { font-size: 1.75rem; font-weight: 700; color: var(--cp-accent); margin-bottom: 8px; }
+.hero p { color: var(--cp-text-muted); font-size: 0.95rem; margin-bottom: 4px; }
+
+/* Tabs */
+.tab-bar {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 24px;
+  background: var(--cp-surface-soft);
+  border: 1px solid var(--cp-border);
+  border-radius: 0.625rem;
+  padding: 4px;
+}
+.tab-btn {
+  flex: 1;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--cp-text-muted);
+  font-family: inherit;
+  font-size: 0.92rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.tab-btn:hover {
+  color: var(--cp-text);
+  background: var(--cp-sheen);
+}
+.tab-btn.active {
+  background: var(--cp-surface);
+  color: var(--cp-accent);
+  box-shadow: 0 0 2px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.14);
+}
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* Legend */
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 24px;
+  padding: 16px 20px;
+  background: var(--cp-surface-soft);
+  border: 1px solid var(--cp-border);
+  border-radius: 0.625rem;
+}
+.legend-title {
+  width: 100%;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--cp-text-muted);
+  margin-bottom: 4px;
+}
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.88rem;
+  color: var(--cp-text);
+}
+
+/* Badges */
+.badge {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.badge-lightweight { background: rgba(22,163,74,0.12); color: var(--cp-success); }
+.badge-versatile   { background: rgba(0,120,212,0.12); color: var(--cp-link); }
+.badge-powerful    { background: var(--cp-accent-soft); color: var(--cp-accent); }
+
+.reasoning-badge {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.r-low    { background: rgba(22,163,74,0.12); color: var(--cp-success); }
+.r-medium { background: rgba(0,120,212,0.12); color: var(--cp-link); }
+.r-high   { background: rgba(245,158,11,0.14); color: var(--cp-warning); }
+.r-xhigh  { background: var(--cp-accent-soft); color: var(--cp-accent); }
+
+/* Table card */
+.table-card {
+  background: var(--cp-surface);
+  border: 1px solid var(--cp-border);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 0 2px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.14);
+  margin-bottom: 24px;
+}
+.table-card h2 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  padding: 20px 24px 12px;
+  color: var(--cp-text);
+  border-bottom: 1px solid var(--cp-border);
+}
+.table-card .card-desc {
+  padding: 0 24px 16px;
+  font-size: 0.88rem;
+  color: var(--cp-text-muted);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+thead { background: var(--cp-surface-soft); }
+th {
+  text-align: left;
+  padding: 12px 16px;
+  font-weight: 600;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--cp-text-muted);
+  border-bottom: 2px solid var(--cp-border);
+}
+td {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--cp-border);
+  vertical-align: top;
+}
+tbody tr:last-child td { border-bottom: none; }
+tbody tr:hover { background: var(--cp-accent-soft); }
+
+.model-name { font-weight: 600; color: var(--cp-text); }
+.provider { font-size: 0.82rem; color: var(--cp-text-muted); }
+.task-list { list-style: none; padding: 0; margin: 0; }
+.task-list li {
+  position: relative;
+  padding-left: 16px;
+  margin-bottom: 2px;
+  font-size: 0.86rem;
+  color: var(--cp-text-soft);
+}
+.task-list li::before {
+  content: "•";
+  position: absolute;
+  left: 0;
+  color: var(--cp-accent);
+  font-weight: 700;
+}
+.price {
+  font-family: Consolas, "Courier New", Courier, monospace;
+  font-size: 0.84rem;
+  color: var(--cp-text);
+  white-space: nowrap;
+}
+
+/* Callout */
+.callout {
+  background: var(--cp-accent-soft);
+  border-left: 4px solid var(--cp-accent);
+  border-radius: 0 0.625rem 0.625rem 0;
+  padding: 16px 20px;
+  margin: 0 0 24px;
+  font-size: 0.92rem;
+  color: var(--cp-text);
+}
+.callout strong { color: var(--cp-accent); }
+
+/* Category header banner */
+.cat-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--cp-border);
+}
+.cat-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 0.625rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+  flex-shrink: 0;
+}
+.cat-icon-lightweight { background: rgba(22,163,74,0.12); }
+.cat-icon-versatile   { background: rgba(0,120,212,0.12); }
+.cat-icon-powerful    { background: var(--cp-accent-soft); }
+.cat-meta h2 { padding: 0; border: none; font-size: 1.1rem; }
+.cat-meta p { font-size: 0.85rem; color: var(--cp-text-muted); margin: 0; }
+
+/* Responsive */
+.table-scroll { overflow-x: auto; }
+@media (max-width: 768px) {
+  .hero { padding: 24px 20px; }
+  th, td { padding: 10px 10px; font-size: 0.82rem; }
+  .tab-btn { padding: 10px 12px; font-size: 0.84rem; }
+}
+
+.footer {
+  text-align: center;
+  padding: 20px 0 8px;
+  color: var(--cp-text-muted);
+  font-size: 0.8rem;
+}
+.footer a { color: var(--cp-link); text-decoration: none; }
+.footer a:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- Hero -->
+  <div class="hero">
+    <h1>GitHub Copilot – Included Models</h1>
+    <p>All models available in GitHub Copilot with their category, reasoning capability, pricing, and recommended task types.</p>
+    <p style="font-size: 0.85rem; color: var(--cp-text-soft); margin-top: 8px;">Source: <a href="https://docs.github.com/en/copilot/reference/ai-models/supported-models" style="color: var(--cp-link); text-decoration: none;">GitHub Docs – Supported Models</a> &amp; <a href="https://docs.github.com/en/copilot/reference/copilot-billing/models-and-pricing" style="color: var(--cp-link); text-decoration: none;">Models &amp; Pricing</a> · June 2026</p>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tab-bar">
+    <button class="tab-btn active" data-tab="by-provider">By Provider</button>
+    <button class="tab-btn" data-tab="by-category">By Category</button>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- TAB 1: BY PROVIDER                                           -->
+  <!-- ============================================================ -->
+  <div id="by-provider" class="tab-panel active">
+
+    <!-- Legend -->
+    <div class="legend">
+      <div class="legend-title">Category Legend</div>
+      <div class="legend-item"><span class="badge badge-lightweight">Lightweight</span> Fast &amp; cost-efficient</div>
+      <div class="legend-item"><span class="badge badge-versatile">Versatile</span> Balanced speed &amp; quality</div>
+      <div class="legend-item"><span class="badge badge-powerful">Powerful</span> Maximum reasoning &amp; accuracy</div>
+    </div>
+
+    <div class="callout">
+      <strong>💡 Guidance:</strong> Use <strong>Lightweight</strong> models for everyday completions, quick Q&amp;A, and simple edits. Use <strong>Versatile</strong> models as your daily driver for most coding tasks. Reserve <strong>Powerful</strong> models for complex debugging, multi-file refactors, architecture decisions, and deep reasoning tasks.
+    </div>
+
+    <!-- OpenAI -->
+    <div class="table-card">
+      <h2>OpenAI Models</h2>
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Model</th>
+              <th>Category</th>
+              <th>Reasoning</th>
+              <th>Output Price<br><span style="font-weight:400;text-transform:none;letter-spacing:0">/1M tokens</span></th>
+              <th>Best For</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><div class="model-name">GPT-5 mini</div><div class="provider">OpenAI · GA</div></td>
+              <td><span class="badge badge-lightweight">Lightweight</span></td>
+              <td><span class="reasoning-badge r-low">Low</span> <span class="reasoning-badge r-medium">Medium</span></td>
+              <td class="price">$2.00</td>
+              <td><ul class="task-list"><li>Quick code completions</li><li>Simple Q&amp;A, explanations</li><li>Boilerplate generation</li><li>Lightweight inline suggestions</li></ul></td>
+            </tr>
+            <tr>
+              <td><div class="model-name">GPT-5.4 nano</div><div class="provider">OpenAI · GA</div></td>
+              <td><span class="badge badge-lightweight">Lightweight</span></td>
+              <td><span class="reasoning-badge r-low">Low</span></td>
+              <td class="price">$1.25</td>
+              <td><ul class="task-list"><li>Fastest completions, lowest cost</li><li>Autocomplete &amp; fill-in-the-blank</li><li>Trivial transformations</li></ul></td>
+            </tr>
+            <tr>
+              <td><div class="model-name">GPT-5.4 mini</div><div class="provider">OpenAI · GA</div></td>
+              <td><span class="badge badge-lightweight">Lightweight</span></td>
+              <td><span class="reasoning-badge r-low">Low</span> <span class="reasoning-badge r-medium">Medium</span></td>
+              <td class="price">$4.50</td>
+              <td><ul class="task-list"><li>Everyday coding tasks</li><li>Small function generation</li><li>Unit test scaffolding</li><li>Code explanations</li></ul></td>
+            </tr>
+            <tr>
+              <td><div class="model-name">GPT-5.4</div><div class="provider">OpenAI · GA</div></td>
+              <td><span class="badge badge-versatile">Versatile</span></td>
+              <td><span class="reasoning-badge r-low">Low</span> <span class="reasoning-badge r-medium">Medium</span> <span class="reasoning-badge r-high">High</span></td>
+              <td class="price">$15.00</td>
+              <td><ul class="task-list"><li>General-purpose daily driver</li><li>Multi-step code generation</li><li>Code review &amp; refactoring</li><li>Documentation writing</li></ul></td>
+            </tr>
+            <tr>
+              <td><div class="model-name">GPT-5.3-Codex</div><div class="provider">OpenAI · GA</div></td>
+              <td><span class="badge badge-powerful">Powerful</span></td>
+              <td><span class="reasoning-badge r-medium">Medium</span> <span class="reasoning-badge r-high">High</span> <span class="reasoning-badge r-xhigh">X-High</span></td>
+              <td class="price">$14.00</td>
+              <td><ul class="task-list"><li>Agentic coding workflows</li><li>Multi-file refactors</li><li>Complex code synthesis</li><li>Architecture-level changes</li></ul></td>
+            </tr>
+            <tr>
+              <td><div class="model-name">GPT-5.5</div><div class="provider">OpenAI · GA</div></td>
+              <td><span class="badge badge-powerful">Powerful</span></td>
+              <td><span class="reasoning-badge r-high">High</span> <span class="reasoning-badge r-xhigh">X-High</span></td>
+              <td class="price">$30.00</td>
+              <td><ul class="task-list"><li>Hardest reasoning problems</li><li>Complex debugging &amp; root cause analysis</li><li>Cross-codebase refactoring</li><li>Novel algorithm design</li></ul></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Anthropic -->
+    <div class="table-card">
+      <h2>Anthropic Models</h2>
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Model</th>
+              <th>Category</th>
+              <th>Reasoning</th>
+              <th>Output Price<br><span style="font-weight:400;text-transform:none;letter-spacing:0">/1M tokens</span></th>
+              <th>Best For</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><div class="model-name">Claude Haiku 4.5</div><div class="provider">Anthropic · GA</div></td>
+              <td><span class="badge badge-versatile">Versatile</span></td>
+              <td><span class="reasoning-badge r-low">Low</span> <span class="reasoning-badge r-medium">Medium</span></td>
+              <td class="price">$5.00</td>
+              <td><ul class="task-list"><li>Fast, cost-effective chat</li><li>Code explanations &amp; Q&amp;A</li><li>Simple edits &amp; completions</li><li>Exploration &amp; prototyping</li></ul></td>
+            </tr>
+            <tr>
+              <td><div class="model-name">Claude Sonnet 4</div><div class="provider">Anthropic · GA</div></td>
+              <td><span class="badge badge-versatile">Versatile</span></td>
+              <td><span class="reasoning-badge r-medium">Medium</span> <span class="reasoning-badge r-high">High</span></td>
+              <td class="price">$15.00</td>
+              <td><ul class="task-list"><li>Balanced daily coding</li><li>Code generation &amp; refactoring</li><li>Test writing</li><li>Detailed code review</li></ul></td>
+            </tr>
+            <tr>
+              <td><div class="model-name">Claude Sonnet 4.5</div><div class="provider">Anthropic · GA</div></td>
+              <td><span class="badge badge-versatile">Versatile</span></td>
+              <td><span class="reasoning-badge r-medium">Medium</span> <span class="reasoning-badge r-high">High</span></td>
+              <td class="price">$15.00</td>
+              <td><ul class="task-list"><li>Strong general-purpose coding</li><li>Multi-step reasoning tasks</li><li>Complex function implementation</li><li>Documentation generation</li></ul></td>
+            </tr>
+            <tr>
+              <td><div class="model-name">Claude Sonnet 4.6</div><div class="provider">Anthropic · GA</div></td>
+              <td><span class="badge badge-versatile">Versatile</span></td>
+              <td><span class="reasoning-badge r-medium">Medium</span> <span class="reasoning-badge r-high">High</span></td>
+              <td class="price">$15.00</td>
+              <td><ul class="task-list"><li>Latest versatile Anthropic model</li><li>Complex code generation</li><li>Agentic workflows</li><li>Code review &amp; analysis</li></ul></td>
+            </tr>
+            <tr>
+              <td><div class="model-name">Claude Opus 4.5</div><div class="provider">Anthropic · GA</div></td>
+              <td><span class="badge badge-powerful">Powerful</span></td>
+              <td><span class="reasoning-badge r-high">High</span> <span class="reasoning-badge r-xhigh">X-High</span></td>
+              <td class="price">$25.00</td>
+              <td><ul class="task-list"><li>Deep reasoning &amp; debugging</li><li>Multi-file architecture work</li><li>Complex refactors</li></ul></td>
+            </tr>
+            <tr>
+              <td><div class="model-name">Claude Opus 4.6</div><div class="provider">Anthropic · GA</div></td>
+              <td><span class="badge badge-powerful">Powerful</span></td>
+              <td><span class="reasoning-badge r-high">High</span> <span class="reasoning-badge r-xhigh">X-High</span></td>
+              <td class="price">$25.00</td>
+              <td><ul class="task-list"><li>Advanced agentic coding</li><li>Complex system design</li><li>Root cause analysis</li><li>Cross-service refactoring</li></ul></td>
+            </tr>
+            <tr>
+              <td><div class="model-name">Claude Opus 4.7</div><div class="provider">Anthropic · GA</div></td>
+              <td><span class="badge badge-powerful">Powerful</span></td>
+              <td><span class="reasoning-badge r-high">High</span> <span class="reasoning-badge r-xhigh">X-High</span></td>
+              <td class="price">$25.00</td>
+              <td><ul class="task-list"><li>Most capable Anthropic reasoning</li><li>Hardest debugging tasks</li><li>Full-codebase understanding</li><li>Novel architecture decisions</li></ul></td>
+            </tr>
+            <tr>
+              <td><div class="model-name">Claude Opus 4.8</div><div class="provider">Anthropic · GA</div></td>
+              <td><span class="badge badge-powerful">Powerful</span></td>
+              <td><span class="reasoning-badge r-high">High</span> <span class="reasoning-badge r-xhigh">X-High</span></td>
+              <td class="price">$25.00</td>
+              <td><ul class="task-list"><li>Latest &amp; most powerful Anthropic</li><li>Maximum quality reasoning</li><li>Complex multi-step agent tasks</li><li>Difficult problem solving</li></ul></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Google -->
+    <div class="table-card">
+      <h2>Google Models</h2>
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Model</th>
+              <th>Category</th>
+              <th>Reasoning</th>
+              <th>Output Price<br><span style="font-weight:400;text-transform:none;letter-spacing:0">/1M tokens</span></th>
+              <th>Best For</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><div class="model-name">Gemini 3 Flash</div><div class="provider">Google · Preview</div></td>
+              <td><span class="badge badge-lightweight">Lightweight</span></td>
+              <td><span class="reasoning-badge r-low">Low</span> <span class="reasoning-badge r-medium">Medium</span></td>
+              <td class="price">$3.00</td>
+              <td><ul class="task-list"><li>Fast lightweight completions</li><li>Quick code Q&amp;A</li><li>Simple transformations</li></ul></td>
+            </tr>
+            <tr>
+              <td><div class="model-name">Gemini 3.5 Flash</div><div class="provider">Google · GA</div></td>
+              <td><span class="badge badge-lightweight">Lightweight</span></td>
+              <td><span class="reasoning-badge r-low">Low</span> <span class="reasoning-badge r-medium">Medium</span></td>
+              <td class="price">$9.00</td>
+              <td><ul class="task-list"><li>Multimodal tasks (images + code)</li><li>Fast iteration cycles</li><li>Documentation &amp; summaries</li><li>Everyday coding with speed</li></ul></td>
+            </tr>
+            <tr>
+              <td><div class="model-name">Gemini 2.5 Pro</div><div class="provider">Google · GA</div></td>
+              <td><span class="badge badge-powerful">Powerful</span></td>
+              <td><span class="reasoning-badge r-medium">Medium</span> <span class="reasoning-badge r-high">High</span></td>
+              <td class="price">$10.00</td>
+              <td><ul class="task-list"><li>Long-context reasoning (200K+)</li><li>Multi-file analysis</li><li>Complex code generation</li><li>Detailed debugging</li></ul></td>
+            </tr>
+            <tr>
+              <td><div class="model-name">Gemini 3.1 Pro</div><div class="provider">Google · Preview</div></td>
+              <td><span class="badge badge-powerful">Powerful</span></td>
+              <td><span class="reasoning-badge r-high">High</span> <span class="reasoning-badge r-xhigh">X-High</span></td>
+              <td class="price">$12.00</td>
+              <td><ul class="task-list"><li>Latest Google deep reasoning</li><li>Complex multi-step problems</li><li>Architecture &amp; system design</li><li>Advanced debugging</li></ul></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Microsoft & GitHub -->
+    <div class="table-card">
+      <h2>Microsoft &amp; GitHub Models</h2>
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Model</th>
+              <th>Category</th>
+              <th>Reasoning</th>
+              <th>Output Price<br><span style="font-weight:400;text-transform:none;letter-spacing:0">/1M tokens</span></th>
+              <th>Best For</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><div class="model-name">MAI-Code-1-Flash</div><div class="provider">Microsoft · GA</div></td>
+              <td><span class="badge badge-lightweight">Lightweight</span></td>
+              <td><span class="reasoning-badge r-low">Low</span> <span class="reasoning-badge r-medium">Medium</span></td>
+              <td class="price">$4.50</td>
+              <td><ul class="task-list"><li>Code-optimized lightweight tasks</li><li>Fast completions &amp; suggestions</li><li>Boilerplate &amp; scaffolding</li></ul></td>
+            </tr>
+            <tr>
+              <td><div class="model-name">Raptor mini</div><div class="provider">GitHub (fine-tuned GPT-5 mini) · Preview</div></td>
+              <td><span class="badge badge-versatile">Versatile</span></td>
+              <td><span class="reasoning-badge r-low">Low</span> <span class="reasoning-badge r-medium">Medium</span></td>
+              <td class="price">$2.00</td>
+              <td><ul class="task-list"><li>GitHub-optimized code tasks</li><li>PR descriptions &amp; summaries</li><li>Issue triage &amp; analysis</li><li>Cost-effective general coding</li></ul></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Reasoning Levels -->
+    <div class="table-card">
+      <h2>Reasoning Levels Explained</h2>
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:120px">Level</th>
+              <th>Description</th>
+              <th>When to Use</th>
+              <th style="width:110px">Credit Impact</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="reasoning-badge r-low">Low</span></td>
+              <td>Fastest responses, minimal chain-of-thought</td>
+              <td>Autocomplete, simple Q&amp;A, boilerplate, quick edits</td>
+              <td class="price">Lowest</td>
+            </tr>
+            <tr>
+              <td><span class="reasoning-badge r-medium">Medium</span></td>
+              <td>Balanced reasoning, good for most tasks</td>
+              <td>Standard coding, function generation, test writing, code review</td>
+              <td class="price">Moderate</td>
+            </tr>
+            <tr>
+              <td><span class="reasoning-badge r-high">High</span></td>
+              <td>Deep reasoning with extended thinking</td>
+              <td>Debugging, multi-file refactors, complex logic, architecture</td>
+              <td class="price">High</td>
+            </tr>
+            <tr>
+              <td><span class="reasoning-badge r-xhigh">X-High</span></td>
+              <td>Maximum reasoning depth, longest thinking time</td>
+              <td>Hardest problems, novel algorithms, cross-codebase analysis</td>
+              <td class="price">Highest</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="callout" style="border-left-color: var(--cp-warning); background: rgba(245,158,11,0.08);">
+      <strong>⚠️ Cost Tip:</strong> Higher reasoning levels consume significantly more credits. Use <strong>Low/Medium</strong> for routine tasks and reserve <strong>High/X-High</strong> for complex problems where quality matters more than speed. Powerful models at X-High reasoning can use up to 27× the base credit cost per interaction.
+    </div>
+
+  </div><!-- /by-provider -->
+
+
+  <!-- ============================================================ -->
+  <!-- TAB 2: BY CATEGORY                                           -->
+  <!-- ============================================================ -->
+  <div id="by-category" class="tab-panel">
+
+    <div class="callout">
+      <strong>💡 How to read this view:</strong> Models are grouped by their capability tier. Within each tier, they are sorted by output price (lowest first). Pick the <strong>cheapest model</strong> in a tier that meets your task complexity — you get the same category of quality at lower cost.
+    </div>
+
+    <!-- LIGHTWEIGHT -->
+    <div class="table-card">
+      <div class="cat-banner">
+        <div class="cat-icon cat-icon-lightweight">⚡</div>
+        <div class="cat-meta">
+          <h2>Lightweight Models</h2>
+          <p>Fastest response times, lowest credit cost. Ideal for high-volume, low-complexity tasks.</p>
+        </div>
+      </div>
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Model</th>
+              <th>Provider</th>
+              <th>Reasoning</th>
+              <th>Output Price<br><span style="font-weight:400;text-transform:none;letter-spacing:0">/1M tokens</span></th>
+              <th>Best For</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><div class="model-name">GPT-5.4 nano</div></td>
+              <td><div class="provider">OpenAI · GA</div></td>
+              <td><span class="reasoning-badge r-low">Low</span></td>
+              <td class="price">$1.25</td>
+              <td><ul class="task-list"><li>Fastest completions, lowest cost</li><li>Autocomplete &amp; fill-in-the-blank</li><li>Trivial transformations</li></ul></td>
+            </tr>
+            <tr>
+              <td><div class="model-name">GPT-5 mini</div></td>
+              <td><div class="provider">OpenAI · GA</div></td>
+              <td><span class="reasoning-badge r-low">Low</span> <span class="reasoning-badge r-medium">Medium</span></td>
+              <td class="price">$2.00</td>
+              <td><ul class="task-list"><li>Quick code completions</li><li>Simple Q&amp;A, explanations</li><li>Boilerplate generation</li><li>Lightweight inline suggestions</li></ul></td>
+            </tr>
+            <tr>
+              <td><div class="model-name">Gemini 3 Flash</div></td>
+              <td><div class="provider">Google · Preview</div></td>
+              <td><span class="reasoning-badge r-low">Low</span> <span class="reasoning-badge r-medium">Medium</span></td>
+              <td class="price">$3.00</td>
+              <td><ul class="task-list"><li>Fast lightweight completions</li><li>Quick code Q&amp;A</li><li>Simple transformations</li></ul></td>
+            </tr>
+            <tr>
+              <td><div class="model-name">GPT-5.4 mini</div></td>
+              <td><div class="provider">OpenAI · GA</div></td>
+              <td><span class="reasoning-badge r-low">Low</span> <span class="reasoning-badge r-medium">Medium</span></td>
+              <td class="price">$4.50</td>
+              <td><ul class="task-list"><li>Everyday coding tasks</li><li>Small function generation</li><li>Unit test scaffolding</li><li>Code explanations</li></ul></td>
+            </tr>
+            <tr>
+              <td><div class="model-name">MAI-Code-1-Flash</div></td>
+              <td><div class="provider">Microsoft · GA</div></td>
+              <td><span class="reasoning-badge r-low">Low</span> <span class="reasoning-badge r-medium">Medium</span></td>
+              <td class="price">$4.50</td>
+              <td><ul class="task-list"><li>Code-optimized lightweight tasks</li><li>Fast completions &amp; suggestions</li><li>Boilerplate &amp; scaffolding</li></ul></td>
+            </tr>
+            <tr>
+              <td><div class="model-name">Gemini 3.5 Flash</div></td>
+              <td><div class="provider">Google · GA</div></td>
+              <td><span class="reasoning-badge r-low">Low</span> <span class="reasoning-badge r-medium">Medium</span></td>
+              <td class="price">$9.00</td>
+              <td><ul class="task-list"><li>Multimodal tasks (images + code)</li><li>Fast iteration cycles</li><li>Documentation &amp; summaries</li></ul></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- VERSATILE -->
+    <div class="table-card">
+      <div class="cat-banner">
+        <div class="cat-icon cat-icon-versatile">⚖️</div>
+        <div class="cat-meta">
+          <h2>Versatile Models</h2>
+          <p>Balanced speed and quality. The recommended default for most day-to-day coding work.</p>
+        </div>
+      </div>
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Model</th>
+              <th>Provider</th>
+              <th>Reasoning</th>
+              <th>Output Price<br><span style="font-weight:400;text-transform:none;letter-spacing:0">/1M tokens</span></th>
+              <th>Best For</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><div class="model-name">Raptor mini</div></td>
+              <td><div class="provider">GitHub · Preview</div></td>
+              <td><span class="reasoning-badge r-low">Low</span> <span class="reasoning-badge r-medium">Medium</span></td>
+              <td class="price">$2.00</td>
+              <td><ul class="task-list"><li>GitHub-optimized code tasks</li><li>PR descriptions &amp; summaries</li><li>Issue triage &amp; analysis</li><li>Cost-effective general coding</li></ul></td>
+            </tr>
+            <tr>
+              <td><div class="model-name">Claude Haiku 4.5</div></td>
+              <td><div class="provider">Anthropic · GA</div></td>
+              <td><span class="reasoning-badge r-low">Low</span> <span class="reasoning-badge r-medium">Medium</span></td>
+              <td class="price">$5.00</td>
+              <td><ul class="task-list"><li>Fast, cost-effective chat</li><li>Code explanations &amp; Q&amp;A</li><li>Simple edits &amp; completions</li><li>Exploration &amp; prototyping</li></ul></td>
+            </tr>
+            <tr>
+              <td><div class="model-name">GPT-5.4</div></td>
+              <td><div class="provider">OpenAI · GA</div></td>
+              <td><span class="reasoning-badge r-low">Low</span> <span class="reasoning-badge r-medium">Medium</span> <span class="reasoning-badge r-high">High</span></td>
+              <td class="price">$15.00</td>
+              <td><ul class="task-list"><li>General-purpose daily driver</li><li>Multi-step code generation</li><li>Code review &amp; refactoring</li><li>Documentation writing</li></ul></td>
+            </tr>
+            <tr>
+              <td><div class="model-name">Claude Sonnet 4</div></td>
+              <td><div class="provider">Anthropic · GA</div></td>
+              <td><span class="reasoning-badge r-medium">Medium</span> <span class="reasoning-badge r-high">High</span></td>
+              <td class="price">$15.00</td>
+              <td><ul class="task-list"><li>Balanced daily coding</li><li>Code generation &amp; refactoring</li><li>Test writing</li><li>Detailed code review</li></ul></td>
+            </tr>
+            <tr>
+              <td><div class="model-name">Claude Sonnet 4.5</div></td>
+              <td><div class="provider">Anthropic · GA</div></td>
+              <td><span class="reasoning-badge r-medium">Medium</span> <span class="reasoning-badge r-high">High</span></td>
+              <td class="price">$15.00</td>
+              <td><ul class="task-list"><li>Strong general-purpose coding</li><li>Multi-step reasoning tasks</li><li>Complex function implementation</li><li>Documentation generation</li></ul></td>
+            </tr>
+            <tr>
+              <td><div class="model-name">Claude Sonnet 4.6</div></td>
+              <td><div class="provider">Anthropic · GA</div></td>
+              <td><span class="reasoning-badge r-medium">Medium</span> <span class="reasoning-badge r-high">High</span></td>
+              <td class="price">$15.00</td>
+              <td><ul class="task-list"><li>Latest versatile Anthropic model</li><li>Complex code generation</li><li>Agentic workflows</li><li>Code review &amp; analysis</li></ul></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- POWERFUL -->
+    <div class="table-card">
+      <div class="cat-banner">
+        <div class="cat-icon cat-icon-powerful">🧠</div>
+        <div class="cat-meta">
+          <h2>Powerful Models</h2>
+          <p>Maximum reasoning depth and accuracy. Reserve for complex, high-value tasks where quality justifies higher credit cost.</p>
+        </div>
+      </div>
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Model</th>
+              <th>Provider</th>
+              <th>Reasoning</th>
+              <th>Output Price<br><span style="font-weight:400;text-transform:none;letter-spacing:0">/1M tokens</span></th>
+              <th>Best For</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><div class="model-name">Gemini 2.5 Pro</div></td>
+              <td><div class="provider">Google · GA</div></td>
+              <td><span class="reasoning-badge r-medium">Medium</span> <span class="reasoning-badge r-high">High</span></td>
+              <td class="price">$10.00</td>
+              <td><ul class="task-list"><li>Long-context reasoning (200K+)</li><li>Multi-file analysis</li><li>Complex code generation</li><li>Detailed debugging</li></ul></td>
+            </tr>
+            <tr>
+              <td><div class="model-name">Gemini 3.1 Pro</div></td>
+              <td><div class="provider">Google · Preview</div></td>
+              <td><span class="reasoning-badge r-high">High</span> <span class="reasoning-badge r-xhigh">X-High</span></td>
+              <td class="price">$12.00</td>
+              <td><ul class="task-list"><li>Latest Google deep reasoning</li><li>Complex multi-step problems</li><li>Architecture &amp; system design</li><li>Advanced debugging</li></ul></td>
+            </tr>
+            <tr>
+              <td><div class="model-name">GPT-5.3-Codex</div></td>
+              <td><div class="provider">OpenAI · GA</div></td>
+              <td><span class="reasoning-badge r-medium">Medium</span> <span class="reasoning-badge r-high">High</span> <span class="reasoning-badge r-xhigh">X-High</span></td>
+              <td class="price">$14.00</td>
+              <td><ul class="task-list"><li>Agentic coding workflows</li><li>Multi-file refactors</li><li>Complex code synthesis</li><li>Architecture-level changes</li></ul></td>
+            </tr>
+            <tr>
+              <td><div class="model-name">Claude Opus 4.5</div></td>
+              <td><div class="provider">Anthropic · GA</div></td>
+              <td><span class="reasoning-badge r-high">High</span> <span class="reasoning-badge r-xhigh">X-High</span></td>
+              <td class="price">$25.00</td>
+              <td><ul class="task-list"><li>Deep reasoning &amp; debugging</li><li>Multi-file architecture work</li><li>Complex refactors</li></ul></td>
+            </tr>
+            <tr>
+              <td><div class="model-name">Claude Opus 4.6</div></td>
+              <td><div class="provider">Anthropic · GA</div></td>
+              <td><span class="reasoning-badge r-high">High</span> <span class="reasoning-badge r-xhigh">X-High</span></td>
+              <td class="price">$25.00</td>
+              <td><ul class="task-list"><li>Advanced agentic coding</li><li>Complex system design</li><li>Root cause analysis</li><li>Cross-service refactoring</li></ul></td>
+            </tr>
+            <tr>
+              <td><div class="model-name">Claude Opus 4.7</div></td>
+              <td><div class="provider">Anthropic · GA</div></td>
+              <td><span class="reasoning-badge r-high">High</span> <span class="reasoning-badge r-xhigh">X-High</span></td>
+              <td class="price">$25.00</td>
+              <td><ul class="task-list"><li>Most capable Anthropic reasoning</li><li>Hardest debugging tasks</li><li>Full-codebase understanding</li><li>Novel architecture decisions</li></ul></td>
+            </tr>
+            <tr>
+              <td><div class="model-name">Claude Opus 4.8</div></td>
+              <td><div class="provider">Anthropic · GA</div></td>
+              <td><span class="reasoning-badge r-high">High</span> <span class="reasoning-badge r-xhigh">X-High</span></td>
+              <td class="price">$25.00</td>
+              <td><ul class="task-list"><li>Latest &amp; most powerful Anthropic</li><li>Maximum quality reasoning</li><li>Complex multi-step agent tasks</li><li>Difficult problem solving</li></ul></td>
+            </tr>
+            <tr>
+              <td><div class="model-name">GPT-5.5</div></td>
+              <td><div class="provider">OpenAI · GA</div></td>
+              <td><span class="reasoning-badge r-high">High</span> <span class="reasoning-badge r-xhigh">X-High</span></td>
+              <td class="price">$30.00</td>
+              <td><ul class="task-list"><li>Hardest reasoning problems</li><li>Complex debugging &amp; root cause analysis</li><li>Cross-codebase refactoring</li><li>Novel algorithm design</li></ul></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Reasoning Levels (shared) -->
+    <div class="table-card">
+      <h2>Reasoning Levels Explained</h2>
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:120px">Level</th>
+              <th>Description</th>
+              <th>When to Use</th>
+              <th style="width:110px">Credit Impact</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="reasoning-badge r-low">Low</span></td>
+              <td>Fastest responses, minimal chain-of-thought</td>
+              <td>Autocomplete, simple Q&amp;A, boilerplate, quick edits</td>
+              <td class="price">Lowest</td>
+            </tr>
+            <tr>
+              <td><span class="reasoning-badge r-medium">Medium</span></td>
+              <td>Balanced reasoning, good for most tasks</td>
+              <td>Standard coding, function generation, test writing, code review</td>
+              <td class="price">Moderate</td>
+            </tr>
+            <tr>
+              <td><span class="reasoning-badge r-high">High</span></td>
+              <td>Deep reasoning with extended thinking</td>
+              <td>Debugging, multi-file refactors, complex logic, architecture</td>
+              <td class="price">High</td>
+            </tr>
+            <tr>
+              <td><span class="reasoning-badge r-xhigh">X-High</span></td>
+              <td>Maximum reasoning depth, longest thinking time</td>
+              <td>Hardest problems, novel algorithms, cross-codebase analysis</td>
+              <td class="price">Highest</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="callout" style="border-left-color: var(--cp-warning); background: rgba(245,158,11,0.08);">
+      <strong>⚠️ Cost Tip:</strong> Higher reasoning levels consume significantly more credits. Use <strong>Low/Medium</strong> for routine tasks and reserve <strong>High/X-High</strong> for complex problems where quality matters more than speed. Powerful models at X-High reasoning can use up to 27× the base credit cost per interaction.
+    </div>
+
+  </div><!-- /by-category -->
+
+  <div class="footer">
+    Data sourced from <a href="https://docs.github.com/en/copilot/reference/ai-models/supported-models">GitHub Docs</a> · June 2026 · Prices are per 1M output tokens · 1 AI Credit = $0.01 USD
+  </div>
+
+</div>
+
+<script>
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById(btn.dataset.tab).classList.add('active');
+    });
+  });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,1765 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>GitHub Copilot — Strategic Enablement</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Source+Serif+4:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet" />
+<style>
+  /* ── Design tokens (from KPIs palette) ──────────── */
+  :root {
+    --bg-0: #07090f;
+    --bg-1: #0d1117;
+    --bg-2: #131a26;
+    --bg-3: #1b2436;
+    --border: #243047;
+    --border-soft: #1a2336;
+    --text-0: #f1f5fb;
+    --text-1: #cfd6e4;
+    --text-2: #8b95ab;
+    --text-3: #5a6378;
+    --cyan: #3aafff;
+    --cyan-soft: #75c7ff;
+    --green: #3fb950;
+    --green-soft: #7ee787;
+    --red: #f85149;
+    --purple: #b392f0;
+    --violet: #8b6fef;
+    --pink: #f0a3b7;
+    --teal: #59f0d0;
+    --gold: #e3b341;
+    --orange: #e97132;
+    --shadow: 0 10px 40px rgba(0,0,0,.45);
+    --r-lg: 18px;
+    --r-md: 12px;
+    --r-sm: 8px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    height: 100%; overflow: hidden;
+    font-family: 'Inter', system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg-0);
+    color: var(--text-1);
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Decorative ambient glow */
+  body::before {
+    content: "";
+    position: fixed; inset: 0;
+    background:
+      radial-gradient(900px 600px at 85% -10%, rgba(58,175,255,.08), transparent 60%),
+      radial-gradient(700px 500px at -10% 30%, rgba(179,146,240,.06), transparent 60%),
+      radial-gradient(800px 600px at 50% 120%, rgba(63,185,80,.05), transparent 60%);
+    pointer-events: none; z-index: 0;
+  }
+
+  /* ── Top nav bar ────────────────────────────────── */
+  .topnav {
+    position: fixed; top: 0; left: 0; right: 0;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 32px;
+    background: rgba(7,9,15,.72);
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border-soft);
+    z-index: 100;
+  }
+  .topnav .brand {
+    display: flex; align-items: center; gap: 10px;
+    font-weight: 600; color: var(--text-0); letter-spacing: .2px; font-size: 14px;
+  }
+  .topnav .brand .dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--green); box-shadow: 0 0 12px var(--green);
+  }
+  .topnav .brand svg { width: 22px; height: 22px; fill: var(--text-0); margin-right: 2px; }
+
+  /* ── Progress bar ───────────────────────────────── */
+  .progress-bar {
+    position: fixed; top: 53px; left: 0; right: 0;
+    height: 2px; background: var(--bg-2); z-index: 99;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--cyan), var(--violet));
+    transition: width .4s ease;
+  }
+
+  /* ── Side rail dots ─────────────────────────────── */
+  .rail {
+    position: fixed; right: 22px; top: 50%;
+    transform: translateY(-50%);
+    display: flex; flex-direction: column; gap: 10px; z-index: 90;
+  }
+  .rail a {
+    display: block; width: 10px; height: 10px; border-radius: 50%;
+    background: rgba(255,255,255,.10); border: 1px solid rgba(255,255,255,.15);
+    transition: all .2s; cursor: pointer; position: relative;
+  }
+  .rail a:hover { background: var(--cyan); border-color: var(--cyan); transform: scale(1.2); }
+  .rail a.active { background: var(--cyan); border-color: var(--cyan); box-shadow: 0 0 10px var(--cyan); }
+  .rail a::before {
+    content: attr(data-label);
+    position: absolute; right: 22px; top: 50%; transform: translateY(-50%);
+    white-space: nowrap; font-size: 11px; color: var(--text-2);
+    background: var(--bg-2); border: 1px solid var(--border);
+    padding: 4px 8px; border-radius: 6px;
+    opacity: 0; pointer-events: none; transition: opacity .2s;
+  }
+  .rail a:hover::before { opacity: 1; }
+  @media (max-width: 900px) { .rail { display: none; } }
+
+  /* ── Slide container ────────────────────────────── */
+  .slides-viewport { position: fixed; inset: 0; z-index: 1; }
+
+  .slide {
+    position: absolute; inset: 0;
+    padding: 90px 64px 80px;
+    display: flex; flex-direction: column;
+    justify-content: flex-start;
+    overflow-y: auto;
+    opacity: 0; transform: translateX(60px);
+    pointer-events: none;
+    transition: opacity .45s ease, transform .45s ease;
+    max-width: 1400px;
+    margin: 0 auto; left: 0; right: 0;
+  }
+  .slide.active { opacity: 1; transform: translateX(0); pointer-events: auto; }
+  .slide.exit-left { opacity: 0; transform: translateX(-60px); }
+  .slide.exit-right { opacity: 0; transform: translateX(60px); }
+  @media (max-width: 720px) { .slide { padding: 72px 22px; } }
+
+  /* ── Bottom nav arrows ──────────────────────────── */
+  .arrow-nav {
+    position: fixed; bottom: 32px; left: 50%;
+    transform: translateX(-50%);
+    display: flex; align-items: center; gap: 20px; z-index: 200;
+    background: rgba(13,17,23,.85);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--border); border-radius: 999px;
+    padding: 10px 24px;
+  }
+  .arrow-btn {
+    width: 42px; height: 42px;
+    border: 1px solid var(--border); border-radius: 50%;
+    background: var(--bg-2); color: var(--text-1);
+    display: grid; place-items: center; cursor: pointer;
+    transition: all .2s; font-size: 0;
+  }
+  .arrow-btn:hover { background: var(--cyan); color: var(--bg-0); border-color: var(--cyan); }
+  .arrow-btn:disabled { opacity: .25; cursor: default; background: var(--bg-2); color: var(--text-3); border-color: var(--border); }
+  .arrow-btn svg { width: 18px; height: 18px; }
+  .page-indicator {
+    font-family: 'JetBrains Mono', ui-monospace, Menlo, monospace;
+    font-size: 13px; color: var(--text-2); letter-spacing: 1px;
+    min-width: 60px; text-align: center;
+  }
+
+  /* ── Typography ─────────────────────────────────── */
+  .page-tag {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 11px; letter-spacing: 2.5px; text-transform: uppercase;
+    color: var(--cyan-soft); font-weight: 600; margin-bottom: 18px;
+  }
+  .page-tag .dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--cyan); box-shadow: 0 0 8px var(--cyan);
+  }
+  .page-num {
+    position: absolute; top: 96px; right: 64px;
+    font-family: 'JetBrains Mono', ui-monospace, Menlo, monospace;
+    font-size: 12px; color: var(--text-3); letter-spacing: 1px;
+  }
+
+  h1.headline {
+    font-family: 'Source Serif 4', Georgia, serif;
+    font-weight: 700;
+    font-size: clamp(2.2rem, 4.6vw, 4rem);
+    line-height: 1.05; color: var(--text-0);
+    letter-spacing: -.02em; margin: 0 0 18px;
+  }
+  h1.headline .accent { color: var(--cyan); font-style: italic; }
+
+  .subtitle {
+    color: var(--text-2); font-size: 1.1rem;
+    max-width: 720px; line-height: 1.55; margin-bottom: 36px;
+  }
+
+  .eyebrow {
+    font-size: 11px; letter-spacing: 2.5px; text-transform: uppercase;
+    color: var(--text-2); font-weight: 600;
+  }
+
+  /* ════════════════════════════════════════════════════
+     SLIDE: Agenda
+     ════════════════════════════════════════════════════ */
+  .agenda-list {
+    display: flex; flex-direction: column; gap: 0;
+    max-width: 780px; width: 100%;
+  }
+  .agenda-item {
+    display: flex; align-items: center; gap: 22px;
+    padding: 22px 26px;
+    border: 1px solid var(--border-soft);
+    border-bottom: none;
+    background: var(--bg-1);
+    transition: background .2s, border-color .2s;
+    cursor: default;
+  }
+  .agenda-item:first-child { border-radius: var(--r-lg) var(--r-lg) 0 0; }
+  .agenda-item:last-child { border-bottom: 1px solid var(--border-soft); border-radius: 0 0 var(--r-lg) var(--r-lg); }
+  .agenda-item { cursor: pointer; }
+  .agenda-item:hover { background: var(--bg-2); border-color: var(--border); }
+  .agenda-item:hover + .agenda-item { border-top-color: var(--border); }
+
+  .agenda-num {
+    width: 44px; height: 44px; border-radius: 12px;
+    display: grid; place-items: center; flex-shrink: 0;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-weight: 700; font-size: .9rem;
+    color: #fff;
+  }
+  .agenda-item:nth-child(1) .agenda-num { background: linear-gradient(135deg, var(--cyan), #1f6feb); }
+  .agenda-item:nth-child(2) .agenda-num { background: linear-gradient(135deg, var(--green), #238636); }
+  .agenda-item:nth-child(3) .agenda-num { background: linear-gradient(135deg, var(--purple), var(--violet)); }
+  .agenda-item:nth-child(4) .agenda-num { background: linear-gradient(135deg, var(--gold), var(--orange)); }
+  .agenda-item:nth-child(5) .agenda-num { background: linear-gradient(135deg, var(--teal), var(--cyan)); }
+
+  .agenda-text { flex: 1; }
+  .agenda-text .title {
+    font-family: 'Inter', system-ui, -apple-system, "Segoe UI", sans-serif;
+    color: var(--text-0); font-weight: 600; font-size: 1.2rem;
+    margin-bottom: 3px;
+  }
+  .agenda-text .desc {
+    color: var(--text-3); font-size: .88rem;
+    font-family: 'Inter', sans-serif;
+  }
+
+  .agenda-item .arrow {
+    color: var(--text-3); font-size: 20px; transition: color .2s;
+  }
+  .agenda-item:hover .arrow { color: var(--text-0); }
+
+  /* ════════════════════════════════════════════════════
+     SLIDE 1: Full image
+     ════════════════════════════════════════════════════ */
+  .slide-image-wrap {
+    display: flex; align-items: flex-start; justify-content: center;
+    flex: 1; width: 100%; padding-top: 8px;
+  }
+  .slide-image-wrap img {
+    max-width: 100%; max-height: 68vh;
+    object-fit: contain; border-radius: var(--r-md);
+    border: 1px solid var(--border-soft);
+    box-shadow: var(--shadow);
+  }
+
+  /* ════════════════════════════════════════════════════
+     SLIDE 2: The maturity journey (proportional)
+     ════════════════════════════════════════════════════ */
+  .s2-canvas {
+    position: relative;
+    width: min(90vw, 140vh);
+    /* 16:9 aspect via padding trick */
+    aspect-ratio: 16 / 9;
+    max-width: 1280px; max-height: 720px;
+  }
+
+  .s2-title {
+    position: absolute; left: 4.8%; top: 5%;
+    width: 90%;
+    font-family: 'Source Serif 4', Georgia, serif;
+    font-size: clamp(1.4rem, 3.2vmin, 2.4rem);
+    font-weight: 700; color: var(--text-0);
+    letter-spacing: -.01em;
+  }
+
+  .s2-bottom-bar {
+    position: absolute;
+    left: 4.8%; top: 68%; width: 89.3%; height: 14%;
+    border-radius: var(--r-md);
+    background: linear-gradient(135deg, rgba(63,185,80,.08), rgba(58,175,255,.06));
+    border: 1px solid var(--border-soft);
+  }
+
+  .s2-row {
+    position: absolute; left: 0; width: 100%;
+    display: flex; align-items: center; height: 10.4%;
+  }
+  .s2-row-l4 { top: 30%; }
+  .s2-row-l3 { top: 43%; }
+  .s2-row-l2 { top: 56%; }
+  .s2-row-l1 { top: 69%; }
+
+  .s2-level {
+    position: absolute; left: 5.8%; width: 23%; height: 100%;
+    border-radius: var(--r-sm);
+    background: linear-gradient(135deg, var(--orange), #1a7fa8);
+    display: flex; align-items: center; justify-content: center;
+    font-size: clamp(0.8rem, 1.8vmin, 1.15rem);
+    font-weight: 700; color: #fff; letter-spacing: .3px;
+    box-shadow: 0 4px 20px rgba(0,0,0,.3);
+  }
+
+  .s2-desc {
+    position: absolute; left: 30.5%; width: 63%; height: 100%;
+    font-size: clamp(0.85rem, 2vmin, 1.2rem);
+    color: var(--text-1); line-height: 1.5;
+    display: flex; align-items: center;
+  }
+  .s2-desc b { font-weight: 700; color: var(--text-0); margin: 0 .15em; }
+
+  /* ════════════════════════════════════════════════════
+     SLIDE: Adoption tracking (images side by side)
+     ════════════════════════════════════════════════════ */
+  .adoption-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 20px;
+    max-width: 1100px; width: 100%;
+  }
+  .adoption-grid .img-frame {
+    border: 1px solid var(--border); border-radius: var(--r-lg);
+    overflow: hidden; background: var(--bg-1); box-shadow: var(--shadow);
+  }
+  .adoption-grid img { display: block; width: 100%; height: auto; }
+  .adoption-links {
+    display: flex; gap: 24px; margin-top: 18px; flex-wrap: wrap;
+  }
+  .adoption-links a {
+    font-size: .82rem; color: var(--cyan); text-decoration: none;
+    border: 1px solid var(--border); padding: 6px 14px;
+    border-radius: 999px; transition: all .2s;
+  }
+  .adoption-links a:hover { background: var(--cyan); color: var(--bg-0); border-color: var(--cyan); }
+  @media (max-width: 820px) { .adoption-grid { grid-template-columns: 1fr; } }
+
+  /* ════════════════════════════════════════════════════
+     SLIDE: KPIs (GitHub + EngThrive) — faithful to KPIs reference
+     ════════════════════════════════════════════════════ */
+  .gh-grid {
+    display: grid; grid-template-columns: 1.4fr 1fr;
+    gap: 24px; align-items: stretch; max-width: 1200px; width: 100%;
+  }
+  .gh-rows { display: flex; flex-direction: column; gap: 16px; }
+  .gh-row {
+    border: 1px solid var(--border); border-radius: var(--r-lg);
+    background: var(--bg-1); padding: 22px 24px; position: relative;
+  }
+  .gh-row .top { display: flex; align-items: center; gap: 14px; margin-bottom: 10px; }
+  .gh-row .ic {
+    width: 40px; height: 40px; border-radius: 50%;
+    display: grid; place-items: center; flex-shrink: 0; color: white;
+  }
+  .gh-row h3 { margin: 0; color: var(--text-0); font-weight: 700; font-size: 1.2rem; }
+  .gh-row p { margin: 0 0 14px; color: var(--text-2); font-size: .92rem; }
+  .gh-row .tags { display: flex; flex-wrap: wrap; gap: 8px; }
+  .gh-row .tags span {
+    font-size: .82rem; padding: 4px 12px;
+    border: 1px solid var(--border); border-radius: 999px;
+    color: var(--text-1); background: var(--bg-2);
+  }
+  .gh-row.happiness .ic { background: linear-gradient(135deg, #1f6feb, #58a6ff); }
+  .gh-row.happiness h3, .gh-row.happiness .tags span { color: var(--cyan-soft); border-color: rgba(58,175,255,.4); }
+  .gh-row.quality .ic { background: linear-gradient(135deg, #6e40c9, #b392f0); }
+  .gh-row.quality h3, .gh-row.quality .tags span { color: var(--purple); border-color: rgba(179,146,240,.4); }
+  .gh-row.velocity .ic { background: linear-gradient(135deg, #db6d28, #f0a3b7); }
+  .gh-row.velocity h3, .gh-row.velocity .tags span { color: var(--pink); border-color: rgba(240,163,183,.4); }
+
+  .business {
+    border: 1px solid rgba(63,185,80,.4); border-radius: var(--r-lg);
+    background: linear-gradient(160deg, rgba(63,185,80,.10), rgba(63,185,80,.02) 60%), var(--bg-1);
+    padding: 26px 26px 28px; display: flex; flex-direction: column;
+  }
+  .business .top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+  .business h3 { margin: 0; color: var(--text-0); font-size: 1.6rem; font-weight: 700; letter-spacing: -.01em; }
+  .business .badge {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: rgba(63,185,80,.15); border: 1px solid rgba(63,185,80,.5);
+    color: var(--green); display: grid; place-items: center;
+  }
+  .business p { margin: 0 0 18px; color: var(--text-2); font-size: .94rem; }
+  .business ul { list-style: none; padding: 0; margin: 0; }
+  .business li {
+    color: var(--text-1); padding: 12px 0; font-size: .95rem;
+    border-bottom: 1px solid var(--border-soft);
+  }
+  .business li:last-child { border-bottom: none; }
+  @media (max-width: 920px) { .gh-grid { grid-template-columns: 1fr; } }
+
+  /* SCECE metrics */
+  .scece-list { display: flex; flex-direction: column; gap: 16px; max-width: 1200px; width: 100%; }
+  .scece-row {
+    display: grid; grid-template-columns: 50px 220px 1fr;
+    align-items: center; gap: 22px; padding: 22px 26px;
+    border: 1px solid var(--border); border-radius: var(--r-lg);
+    background: var(--bg-1); transition: border-color .2s, transform .2s;
+  }
+  .scece-row:hover { border-color: var(--cyan); transform: translateX(4px); }
+  .scece-row .letter {
+    width: 50px; height: 50px; border-radius: 50%;
+    display: grid; place-items: center;
+    font-weight: 800; font-size: 1.2rem; color: #07090f; flex-shrink: 0;
+  }
+  .scece-row .pill {
+    padding: 10px 18px; border-radius: 999px; text-align: center;
+    font-weight: 700; font-size: .95rem; color: white;
+  }
+  .scece-row .body { color: var(--text-1); font-size: .98rem; line-height: 1.55; }
+  .scece-row.S .letter { background: #59f0d0; }
+  .scece-row.S .pill { background: linear-gradient(90deg, #1f6feb, #58a6ff); color: white; }
+  .scece-row.C .letter { background: var(--pink); }
+  .scece-row.C .pill { background: linear-gradient(90deg, #1f6feb, #58a6ff); color: white; }
+  .scece-row.E1 .letter, .scece-row.E2 .letter, .scece-row.E3 .letter { background: #c8b6ff; }
+  .scece-row.E1 .pill { background: linear-gradient(90deg, #58a6ff, #79c0ff); color: white; }
+  .scece-row.E2 .pill { background: linear-gradient(90deg, #6e40c9, #b392f0); color: white; }
+  .scece-row.E3 .pill { background: linear-gradient(90deg, #6e40c9, #b392f0); color: white; }
+  @media (max-width: 720px) {
+    .scece-row { grid-template-columns: 1fr; text-align: left; gap: 12px; }
+    .scece-row .pill { justify-self: start; }
+  }
+
+  .accent-line {
+    height: 2px; width: 64px;
+    background: linear-gradient(90deg, var(--cyan), transparent);
+    margin-bottom: 22px;
+  }
+
+  /* ════════════════════════════════════════════════════
+     SLIDE: Primitives (4-card grid)
+     ════════════════════════════════════════════════════ */
+  .prim-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    gap: 18px; max-width: 1200px; width: 100%;
+  }
+  .prim-card {
+    background: linear-gradient(180deg, var(--bg-2), var(--bg-1));
+    border: 1px solid var(--border); border-radius: var(--r-lg);
+    padding: 24px 20px; position: relative; overflow: hidden;
+    transition: transform .25s, border-color .25s;
+  }
+  .prim-card:hover { transform: translateY(-4px); border-color: var(--cyan); box-shadow: var(--shadow); }
+  .prim-card::before {
+    content: ""; position: absolute; left: 0; right: 0; top: 0; height: 3px;
+  }
+  .prim-card:nth-child(1)::before { background: var(--cyan); }
+  .prim-card:nth-child(2)::before { background: var(--green); }
+  .prim-card:nth-child(3)::before { background: var(--purple); }
+  .prim-card:nth-child(4)::before { background: var(--gold); }
+  .prim-card h4 {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .85rem; margin-bottom: 10px; font-weight: 600;
+  }
+  .prim-card:nth-child(1) h4 { color: var(--cyan-soft); }
+  .prim-card:nth-child(2) h4 { color: var(--green-soft); }
+  .prim-card:nth-child(3) h4 { color: var(--purple); }
+  .prim-card:nth-child(4) h4 { color: var(--gold); }
+  .prim-card p { color: var(--text-2); font-size: .85rem; line-height: 1.5; }
+  @media (max-width: 1000px) { .prim-grid { grid-template-columns: repeat(2, 1fr); } }
+
+  /* ════════════════════════════════════════════════════
+     SLIDE: Flywheel
+     ════════════════════════════════════════════════════ */
+  .flywheel-layout {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 36px;
+    max-width: 1200px; width: 100%; align-items: center;
+  }
+  .flywheel-text h2 {
+    font-family: 'Source Serif 4', Georgia, serif;
+    font-size: clamp(1.6rem, 3vw, 2.6rem); font-weight: 700;
+    color: var(--text-0); margin-bottom: 16px; line-height: 1.1;
+  }
+  .flywheel-text p { color: var(--text-2); font-size: 1.05rem; line-height: 1.6; max-width: 500px; }
+  .flywheel-text p em { color: var(--text-1); font-style: italic; }
+  .flywheel-img {
+    overflow: visible;
+  }
+  .flywheel-img img { display: block; max-height: 72vh; width: auto; height: auto; object-fit: contain; }
+  @media (max-width: 900px) { .flywheel-layout { grid-template-columns: 1fr; } }
+
+  /* ════════════════════════════════════════════════════
+     SLIDE: Spec driven dev
+     ════════════════════════════════════════════════════ */
+  .spec-card {
+    max-width: 800px; width: 100%;
+    border: 1px solid var(--border); border-radius: var(--r-lg);
+    background: linear-gradient(135deg, rgba(179,146,240,.06), transparent 60%), var(--bg-1);
+    padding: 40px 44px; position: relative;
+  }
+  .spec-card h2 { color: var(--text-0); font-size: 1.5rem; font-weight: 700; margin-bottom: 12px; }
+  .spec-card .vs { color: var(--text-2); font-size: 1.05rem; line-height: 1.6; margin-bottom: 24px; }
+  .spec-card .vs b { color: var(--purple); font-weight: 600; }
+  .spec-insight {
+    display: flex; align-items: center; gap: 14px;
+    padding: 16px 20px; background: var(--bg-2);
+    border: 1px solid var(--border-soft); border-radius: var(--r-md);
+  }
+  .spec-insight .num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1.8rem; font-weight: 700; color: var(--cyan);
+  }
+
+  /* ════════════════════════════════════════════════════
+     SLIDE: Plan → Implement
+     ════════════════════════════════════════════════════ */
+  .plan-flow {
+    display: flex; align-items: center; gap: 0;
+    max-width: 1000px; width: 100%;
+  }
+  .plan-step {
+    flex: 1;
+    border: 1px solid var(--border); border-radius: var(--r-lg);
+    background: var(--bg-1); padding: 28px 24px; text-align: center;
+    position: relative;
+  }
+  .plan-step h3 { color: var(--text-0); font-size: 1.15rem; font-weight: 700; margin-bottom: 8px; }
+  .plan-step p { color: var(--text-2); font-size: .88rem; line-height: 1.5; }
+  .plan-step .step-num {
+    position: absolute; top: -14px; left: 50%; transform: translateX(-50%);
+    width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center;
+    font-weight: 800; font-size: .75rem; color: #fff;
+  }
+  .plan-arrow {
+    width: 48px; flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+    color: var(--text-3);
+  }
+  .plan-arrow svg { width: 24px; height: 24px; }
+
+  /* ════════════════════════════════════════════════════
+     SLIDE: Orchestration flow
+     ════════════════════════════════════════════════════ */
+  .orch-flow {
+    display: flex; flex-direction: column; align-items: center; gap: 0;
+    max-width: 700px; width: 100%;
+  }
+  .orch-hub {
+    padding: 20px 40px; border-radius: var(--r-lg);
+    border: 2px solid var(--cyan); background: rgba(58,175,255,.08);
+    font-weight: 700; font-size: 1.2rem; color: var(--cyan-soft); text-align: center;
+  }
+  .orch-arrow-down {
+    height: 36px; display: flex; align-items: center; justify-content: center; color: var(--text-3);
+  }
+  .orch-steps {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; width: 100%;
+  }
+  .orch-step {
+    padding: 18px 14px; border-radius: var(--r-md);
+    border: 1px solid var(--border); background: var(--bg-1);
+    text-align: center; font-weight: 600; font-size: .95rem; color: var(--text-0);
+  }
+  .orch-return {
+    margin-top: 8px; display: flex; align-items: center; justify-content: center;
+    color: var(--text-3); font-size: .82rem; gap: 6px;
+  }
+
+  /* ════════════════════════════════════════════════════
+     SLIDE: Brownfield / Greenfield
+     ════════════════════════════════════════════════════ */
+  .bf-gf-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 24px;
+    max-width: 1000px; width: 100%;
+  }
+  .bf-gf-card {
+    border: 1px solid var(--border); border-radius: var(--r-lg);
+    background: var(--bg-1); padding: 32px 28px; text-align: center;
+    position: relative; overflow: hidden;
+  }
+  .bf-gf-card::before {
+    content: ""; position: absolute; left: 0; right: 0; top: 0; height: 3px;
+  }
+  .bf-gf-card.brownfield::before { background: var(--gold); }
+  .bf-gf-card.greenfield::before { background: var(--green); }
+  .bf-gf-card h3 { font-size: 1.3rem; font-weight: 700; margin-bottom: 14px; }
+  .bf-gf-card.brownfield h3 { color: var(--gold); }
+  .bf-gf-card.greenfield h3 { color: var(--green-soft); }
+  .bf-gf-card p { color: var(--text-2); font-size: .92rem; line-height: 1.55; }
+  .bf-gf-card .icon { font-size: 2.4rem; margin-bottom: 14px; }
+
+  /* ════════════════════════════════════════════════════
+     SLIDE: Agent gambling (slide 7 style)
+     ════════════════════════════════════════════════════ */
+  .gambling-layout {
+    display: flex; flex-direction: column; justify-content: center;
+    max-width: 800px; width: 100%;
+  }
+  .gambling-layout h1 {
+    font-size: clamp(2.2rem, 5vw, 3.6rem); font-weight: 800; line-height: 1.1;
+    margin-bottom: 60px;
+  }
+  .gambling-layout h1 .accent { color: var(--green); }
+  .gambling-layout .sub {
+    color: var(--text-2); font-size: 1.1rem; line-height: 1.6; max-width: 600px;
+  }
+
+  /* ════════════════════════════════════════════════════
+     SLIDE: Big quote (slide 8 style)
+     ════════════════════════════════════════════════════ */
+  .big-quote {
+    text-align: center; max-width: 900px;
+  }
+  .big-quote h1 {
+    font-size: clamp(2rem, 4.5vw, 3.2rem); font-weight: 600; line-height: 1.25;
+    color: var(--text-0);
+  }
+  .big-quote .g { color: var(--green); }
+  .big-quote .dim { color: var(--text-2); }
+
+  /* ════════════════════════════════════════════════════
+     SLIDE: Two levers (slide 9 style)
+     ════════════════════════════════════════════════════ */
+  .levers-header {
+    max-width: 1200px; width: 100%; margin-bottom: 24px;
+  }
+  .levers-header h1 {
+    font-size: clamp(1.8rem, 4vw, 2.8rem); font-weight: 800; line-height: 1.1;
+  }
+  .levers-header .accent { color: var(--green); }
+  .levers-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 2px;
+    max-width: 1200px; width: 100%;
+    border: 1px solid var(--border); border-radius: var(--r-lg); overflow: hidden;
+  }
+  .lever-col {
+    background: var(--bg-1); padding: 30px 32px;
+  }
+  .lever-col .lever-icon {
+    width: 36px; height: 36px; border: 1px solid var(--border);
+    border-radius: 6px; display: grid; place-items: center;
+    font-family: 'JetBrains Mono', monospace; font-size: .8rem; color: var(--text-1);
+    margin-bottom: 16px;
+  }
+  .lever-col h3 { color: var(--text-0); font-size: 1.25rem; font-weight: 700; margin-bottom: 20px; }
+  .lever-item { margin-bottom: 16px; }
+  .lever-item .label { color: var(--text-0); font-weight: 600; font-size: .92rem; }
+  .lever-item .desc { color: var(--text-2); font-size: .85rem; }
+  .lever-item .underline { text-decoration: underline; }
+  @media (max-width: 900px) { .levers-grid { grid-template-columns: 1fr; } }
+
+  /* ════════════════════════════════════════════════════
+     SLIDE: Guide the agent (slide 10 style)
+     ════════════════════════════════════════════════════ */
+  .guide-header {
+    max-width: 1200px; width: 100%; margin-bottom: 20px;
+  }
+  .guide-header .eyebrow {
+    text-transform: uppercase; letter-spacing: 2px; font-size: .75rem;
+    color: var(--green); font-weight: 600; margin-bottom: 8px;
+  }
+  .guide-header h1 { font-size: clamp(1.8rem, 4vw, 2.8rem); font-weight: 800; color: var(--text-0); }
+  .guide-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px;
+    max-width: 1200px; width: 100%;
+    border: 1px solid var(--green); border-radius: var(--r-lg); overflow: hidden;
+    margin-bottom: 28px;
+  }
+  .guide-cell {
+    background: var(--bg-1); padding: 28px 26px;
+  }
+  .guide-cell .check {
+    width: 32px; height: 32px; border-radius: 50%;
+    border: 2px solid var(--green); color: var(--green);
+    display: grid; place-items: center; margin-bottom: 20px;
+  }
+  .guide-cell h3 { color: var(--text-0); font-size: 1.15rem; font-weight: 700; margin-bottom: 8px; }
+  .guide-cell p { color: var(--text-2); font-size: .88rem; }
+  .guide-bar {
+    display: flex; gap: 2px; max-width: 1200px; width: 100%;
+  }
+  .guide-bar-item {
+    padding: 12px 16px; font-size: .7rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 1px; text-align: center;
+  }
+  .guide-bar-label { color: var(--text-2); font-size: .65rem; margin-bottom: 4px; }
+  @media (max-width: 900px) { .guide-grid { grid-template-columns: 1fr; } }
+  .model-frame {
+    flex: 1; width: 100%; max-width: 1200px;
+    border: 1px solid var(--border); border-radius: var(--r-lg);
+    overflow: hidden; box-shadow: var(--shadow);
+  }
+  .model-frame iframe {
+    width: 100%; height: 70vh; border: none;
+    background: var(--bg-1);
+  }
+  /* ════════════════════════════════════════════════════
+     SLIDE: Research → Plan → Implement (slide 11 style)
+     ════════════════════════════════════════════════════ */
+  .rpi-layout { max-width: 1200px; width: 100%; }
+  .rpi-layout .eyebrow {
+    text-transform: uppercase; letter-spacing: 2px; font-size: .75rem;
+    color: var(--text-3); font-weight: 600; margin-bottom: 8px;
+  }
+  .rpi-layout h1 {
+    font-size: clamp(2rem, 4.5vw, 3.2rem); font-weight: 800; color: var(--text-0);
+    margin-bottom: 36px;
+  }
+  .rpi-prompt {
+    background: var(--bg-2); border: 1px solid var(--border);
+    border-radius: var(--r-md); padding: 14px 20px; margin-bottom: 28px;
+    font-family: 'JetBrains Mono', monospace; font-size: .82rem;
+    color: var(--text-2); max-width: 380px;
+  }
+  .rpi-row {
+    display: flex; align-items: center; gap: 16px; margin-bottom: 28px;
+  }
+  .rpi-label {
+    min-width: 110px; flex-shrink: 0;
+  }
+  .rpi-label .cmd {
+    font-family: 'JetBrains Mono', monospace; font-size: 1rem;
+    font-weight: 700; color: var(--text-0);
+  }
+  .rpi-label .model {
+    font-size: .75rem; color: var(--text-3); font-family: 'JetBrains Mono', monospace;
+  }
+  .rpi-blocks { display: flex; gap: 2px; flex: 1; align-items: stretch; }
+  .rpi-block {
+    padding: 10px 14px; font-size: .7rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: .5px; text-align: center;
+    display: grid; place-items: center; min-height: 48px;
+    border-radius: 4px;
+  }
+  .rpi-block.sys { background: var(--green); color: var(--bg-0); }
+  .rpi-block.prompt { background: var(--violet); color: #fff; }
+  .rpi-block.file { background: var(--gold); color: var(--bg-0); min-width: 50px; }
+  .rpi-block.file.ok { border: 2px solid var(--green); }
+  .rpi-block.file.bad { border: 2px solid var(--red); }
+  .rpi-block.plan { background: var(--cyan); color: var(--bg-0); }
+  .rpi-block.reason { background: var(--text-3); color: var(--bg-0); }
+  .rpi-block.spec { background: var(--cyan); color: var(--bg-0); }
+  .rpi-block.change { background: #196B24; color: #fff; flex: 1; }
+  .rpi-bar { background: linear-gradient(90deg, var(--green), transparent); height: 4px; flex: 1; border-radius: 2px; }
+  .rpi-conn { width: 2px; height: 20px; background: var(--cyan); margin-left: 180px; }
+
+  /* ════════════════════════════════════════════════════
+     SLIDE: Agent configs (slide 12 style)
+     ════════════════════════════════════════════════════ */
+  .configs-layout { max-width: 900px; width: 100%; }
+  .configs-layout h1 {
+    font-size: clamp(1.8rem, 4vw, 2.8rem); font-weight: 800; color: var(--text-0);
+    margin-bottom: 28px;
+  }
+  .config-list {
+    display: flex; flex-direction: column; gap: 0;
+    border: 1px solid var(--green); border-radius: var(--r-lg); overflow: hidden;
+    border-top: 3px solid var(--green);
+  }
+  .config-row {
+    display: flex; align-items: center; gap: 16px;
+    padding: 18px 24px; border-bottom: 1px solid var(--border);
+    background: var(--bg-1);
+  }
+  .config-row:last-child { border-bottom: none; }
+  .config-row .check {
+    width: 26px; height: 26px; border-radius: 50%;
+    border: 2px solid var(--green); color: var(--green);
+    display: grid; place-items: center; flex-shrink: 0;
+  }
+  .config-row .name { color: var(--text-0); font-size: 1.1rem; font-weight: 600; }
+  .config-row .path {
+    font-family: 'JetBrains Mono', monospace; font-size: .78rem;
+    color: var(--text-3); margin-left: 8px;
+  }
+
+  /* ════════════════════════════════════════════════════
+     SLIDE: Power users (slide 13 style)
+     ════════════════════════════════════════════════════ */
+  .power-layout {
+    display: grid; grid-template-columns: .6fr 1fr; gap: 32px;
+    max-width: 1200px; width: 100%; align-items: start;
+  }
+  .power-left .eyebrow {
+    text-transform: uppercase; letter-spacing: 2px; font-size: .7rem;
+    color: var(--text-3); margin-bottom: 12px;
+  }
+  .power-left h1 {
+    font-size: clamp(1.8rem, 4vw, 2.8rem); font-weight: 800; color: var(--text-0);
+    margin-bottom: 24px;
+  }
+  .power-left .caveat {
+    color: var(--text-2); font-size: .88rem; line-height: 1.55;
+  }
+  .power-left .caveat b { color: var(--green-soft); font-weight: 600; }
+  .power-tips { display: flex; flex-direction: column; gap: 0; }
+  .power-tip {
+    padding: 20px 24px; border-bottom: 1px solid var(--border);
+  }
+  .power-tip:last-child { border-bottom: none; }
+  .power-tip h3 { color: var(--text-0); font-size: 1.05rem; font-weight: 700; margin-bottom: 6px; }
+  .power-tip p { color: var(--text-2); font-size: .85rem; line-height: 1.5; }
+  .power-tip a { color: var(--cyan); text-decoration: none; }
+  .power-tip a:hover { text-decoration: underline; }
+  @media (max-width: 900px) { .power-layout { grid-template-columns: 1fr; } }
+
+  /* ════════════════════════════════════════════════════
+     SLIDE: 5 things today (slide 14 style)
+     ════════════════════════════════════════════════════ */
+  .today-layout {
+    display: grid; grid-template-columns: .55fr 1fr; gap: 40px;
+    max-width: 1100px; width: 100%; align-items: center;
+  }
+  .today-left .eyebrow {
+    text-transform: uppercase; letter-spacing: 2px; font-size: .7rem;
+    color: var(--green); font-weight: 600; margin-bottom: 12px;
+  }
+  .today-left h1 {
+    font-size: clamp(2rem, 4.5vw, 3.2rem); font-weight: 800; color: var(--text-0);
+    line-height: 1.1;
+  }
+  .today-list { display: flex; flex-direction: column; gap: 20px; }
+  .today-item {
+    display: flex; align-items: flex-start; gap: 18px;
+  }
+  .today-item .check {
+    width: 32px; height: 32px; border-radius: 50%;
+    border: 2px solid var(--green); color: var(--green);
+    display: grid; place-items: center; flex-shrink: 0; margin-top: 2px;
+  }
+  .today-item p { color: var(--text-1); font-size: 1.05rem; line-height: 1.5; }
+  @media (max-width: 900px) { .today-layout { grid-template-columns: 1fr; } }
+
+  .key-hint {
+    position: fixed; bottom: 32px; left: 28px;
+    font-size: .6rem; color: var(--text-3); opacity: .35; z-index: 50;
+  }
+  kbd {
+    display: inline-block; padding: 2px 5px;
+    border: 1px solid var(--border); border-radius: 4px;
+    font-family: 'JetBrains Mono', monospace; font-size: .52rem;
+    background: var(--bg-2); margin: 0 2px;
+  }
+</style>
+</head>
+<body>
+
+<!-- ── Top nav ──────────────────────────────────── -->
+<nav class="topnav">
+  <div class="brand">
+    <svg viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+    <span>Copilot Strategic Enablement</span>
+    <div class="dot"></div>
+  </div>
+</nav>
+
+<!-- ── Progress ─────────────────────────────────── -->
+<div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+
+<!-- ── Side rail ────────────────────────────────── -->
+<div class="rail" id="rail">
+  <a data-idx="0" data-label="Agenda"></a>
+  <a data-idx="1" data-label="Agentic Phases"></a>
+  <a data-idx="2" data-label="Maturity Journey"></a>
+  <a data-idx="3" data-label="Adoption"></a>
+  <a data-idx="4" data-label="GitHub KPIs"></a>
+  <a data-idx="5" data-label="EngThrive"></a>
+  <a data-idx="6" data-label="Context Eng."></a>
+  <a data-idx="7" data-label="Primitives"></a>
+  <a data-idx="8" data-label="Flywheel"></a>
+  <a data-idx="9" data-label="Agents"></a>
+  <a data-idx="10" data-label="Spec-Driven"></a>
+  <a data-idx="11" data-label="Plan→Impl"></a>
+  <a data-idx="12" data-label="Models"></a>
+  <a data-idx="13" data-label="BF / GF"></a>
+  <a data-idx="14" data-label="Agent Pkg Mgr"></a>
+  <a data-idx="15" data-label="Agent Gambling"></a>
+  <a data-idx="16" data-label="Context Rule"></a>
+  <a data-idx="17" data-label="Two Levers"></a>
+  <a data-idx="18" data-label="Guide Agent"></a>
+  <a data-idx="19" data-label="R→P→I"></a>
+  <a data-idx="20" data-label="Agent Configs"></a>
+  <a data-idx="21" data-label="Power Users"></a>
+  <a data-idx="22" data-label="5 Things"></a>
+  <a data-idx="23" data-label="Cost Gov."></a>
+  <a data-idx="24" data-label="Q&A"></a>
+</div>
+
+<!-- ── Slides ───────────────────────────────────── -->
+<div class="slides-viewport">
+
+  <!-- ════ AGENDA ════ -->
+  <div class="slide active" data-slide="0">
+    <div class="page-num">01 / 25</div>
+    <div class="page-tag"><span class="dot"></span> Agenda</div>
+    <h1 class="headline" style="font-family:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif; font-weight:800; letter-spacing:-.03em;">GitHub Copilot<br><span class="accent">Strategic Enablement</span></h1>
+    <p class="subtitle" style="font-family:'JetBrains Mono',monospace; font-size:.9rem; color:var(--text-3); letter-spacing:.3px;">Repeatable patterns · context engineering · practical workflows</p>
+
+    <div class="agenda-list">
+      <div class="agenda-item" data-goto="1">
+        <div class="agenda-num">01</div>
+        <div class="agenda-text">
+          <div class="title">Where agentic SDLC is today</div>
+          <div class="desc">Industry evolution &amp; team maturity</div>
+        </div>
+        <span class="arrow">&#8250;</span>
+      </div>
+      <div class="agenda-item" data-goto="3">
+        <div class="agenda-num">02</div>
+        <div class="agenda-text">
+          <div class="title">Adoption &amp; productivity correlation</div>
+          <div class="desc">Metrics, KPIs, and what to measure</div>
+        </div>
+        <span class="arrow">&#8250;</span>
+      </div>
+      <div class="agenda-item" data-goto="6">
+        <div class="agenda-num">03</div>
+        <div class="agenda-text">
+          <div class="title">Repeatable patterns for determinism</div>
+          <div class="desc">Context engineering, spec-driven dev, model selection</div>
+        </div>
+        <span class="arrow">&#8250;</span>
+      </div>
+      <div class="agenda-item" data-goto="15">
+        <div class="agenda-num">04</div>
+        <div class="agenda-text">
+          <div class="title">Token optimization &amp; cost governance</div>
+          <div class="desc">Usage-based billing, quality levers, agent configs</div>
+        </div>
+        <span class="arrow">&#8250;</span>
+      </div>
+      <div class="agenda-item" data-goto="24">
+        <div class="agenda-num">05</div>
+        <div class="agenda-text">
+          <div class="title">Q &amp; A</div>
+          <div class="desc">Open discussion</div>
+        </div>
+        <span class="arrow">&#8250;</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ SLIDE 1: Agentic phases (image) ════ -->
+  <div class="slide" data-slide="1">
+    <div class="page-num">02 / 25</div>
+    <div class="page-tag"><span class="dot"></span> Agentic SDLC — Industry Perspective</div>
+    <h1 class="headline" style="font-size:clamp(1.6rem,3.2vw,2.6rem); margin-bottom:28px;">Phases of AI-powered development evolution</h1>
+
+    <div class="slide-image-wrap">
+      <img src="assets/slide1_export.png" alt="Phases of AI-powered development evolution" />
+    </div>
+  </div>
+
+  <!-- ════ SLIDE 2: Maturity journey ════ -->
+  <div class="slide" data-slide="2">
+    <div class="page-num">03 / 25</div>
+    <div class="page-tag"><span class="dot"></span> Team Perspective</div>
+
+    <div class="s2-canvas">
+      <h1 class="s2-title">The maturity journey</h1>
+
+      <div class="s2-row s2-row-l4">
+        <div class="s2-level">L4: Enterprise</div>
+        <div class="s2-desc"><b>Enterprise Agentic Workflows</b>, sometimes in CI/CD, <b>industrialized</b></div>
+      </div>
+      <div class="s2-row s2-row-l3">
+        <div class="s2-level">L3: Organization</div>
+        <div class="s2-desc"><b>Agent Primitives</b> start getting <b>distributed across teams</b></div>
+      </div>
+      <div class="s2-row s2-row-l2">
+        <div class="s2-level">L2: Team</div>
+        <div class="s2-desc"><b>Some teams share</b> scattered prompts and context <b>internally</b></div>
+      </div>
+      <div class="s2-row s2-row-l1">
+        <div class="s2-level">L1: Individual</div>
+        <div class="s2-desc">Ad-hoc, <b>per-developer prompting</b> and <b>experimentation</b></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ SLIDE 3: Adoption tracking ════ -->
+  <div class="slide" data-slide="3">
+    <div class="page-num">04 / 25</div>
+    <div class="page-tag"><span class="dot" style="background:var(--green);box-shadow:0 0 8px var(--green);"></span> Adoption &amp; Productivity</div>
+    <h1 class="headline" style="font-size:clamp(1.4rem,2.8vw,2.2rem); margin-bottom:8px;">Tracking adoption ≠ measuring productivity</h1>
+    <p style="color:var(--text-2);font-size:.95rem;margin-bottom:24px;max-width:900px;">
+      Utilization metrics give visibility into <em>usage</em> — pair them with outcome KPIs to measure real impact.
+    </p>
+    <div class="adoption-grid anim-child">
+      <div class="img-frame"><img src="assets/adoption1.png" alt="Adoption dashboard 1" /></div>
+      <div class="img-frame"><img src="assets/adoption2.png" alt="Adoption dashboard 2" /></div>
+    </div>
+    <div class="adoption-links anim-child">
+      <a href="https://docs.github.com/en/rest/copilot/copilot-metrics" target="_blank" rel="noopener">Metrics API docs ↗</a>
+      <a href="https://docs.github.com/en/copilot/rolling-out-github-copilot-at-scale/analyzing-usage-over-time-with-the-copilot-metrics-api" target="_blank" rel="noopener">Usage dashboard ↗</a>
+      <a href="https://docs.github.com/en/enterprise-cloud@latest/rest/billing/usage?apiVersion=2026-03-10#get-billing-ai-credit-usage-report-for-an-enterprise" target="_blank" rel="noopener">User-level API ↗</a>
+    </div>
+  </div>
+
+  <!-- ════ SLIDE 4: KPIs — GitHub's framework (ref page 6) ════ -->
+  <div class="slide" data-slide="4">
+    <div class="page-num">05 / 25</div>
+    <div class="page-tag"><span class="dot" style="background:var(--green);box-shadow:0 0 8px var(--green);"></span> Adoption &amp; Productivity</div>
+    <h1 class="headline" style="font-family:'Inter',system-ui,sans-serif;font-size:clamp(1.4rem,2.8vw,2.2rem); margin-bottom:6px;">What metrics does GitHub track?</h1>
+    <div class="accent-line anim-child"></div>
+
+    <div class="gh-grid anim-child">
+      <div class="gh-rows">
+        <div class="gh-row happiness">
+          <div class="top">
+            <div class="ic">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+            </div>
+            <h3>Developer happiness</h3>
+          </div>
+          <p>Developers are enabled to do their best work and experience satisfaction.</p>
+          <div class="tags">
+            <span>Flow state experience</span>
+            <span>Engineering tooling satisfaction</span>
+            <span>Copilot satisfaction</span>
+          </div>
+        </div>
+
+        <div class="gh-row quality">
+          <div class="top">
+            <div class="ic">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            </div>
+            <h3>Quality</h3>
+          </div>
+          <p>Ship secure, reliable, and easily maintainable code.</p>
+          <div class="tags">
+            <span>Change failure rate</span>
+            <span>Failed deployment recovery time</span>
+            <span>Code security and maintainability</span>
+          </div>
+        </div>
+
+        <div class="gh-row velocity">
+          <div class="top">
+            <div class="ic">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+            </div>
+            <h3>Velocity</h3>
+          </div>
+          <p>Ship regularly and at a pace that can help you meet business needs.</p>
+          <div class="tags">
+            <span>Lead time</span>
+            <span>Deployment frequency</span>
+            <span>PRs merged per developer</span>
+          </div>
+        </div>
+      </div>
+
+      <aside class="business">
+        <div class="top">
+          <h3>Business outcomes</h3>
+          <span class="badge">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+          </span>
+        </div>
+        <p>Ship code that enables the business to innovate and meet their strategic objectives with increasing efficiency.</p>
+        <ul>
+          <li>AI leverage</li>
+          <li>Engineering expenses to revenue</li>
+          <li>Feature engineering expenses to total engineering expenses</li>
+        </ul>
+      </aside>
+    </div>
+  </div>
+
+  <!-- ════ SLIDE 5: KPIs — EngThrive / SCECE (ref page 7) ════ -->
+  <div class="slide" data-slide="5">
+    <div class="page-num">06 / 25</div>
+    <div class="page-tag"><span class="dot" style="background:var(--green);box-shadow:0 0 8px var(--green);"></span> Adoption &amp; Productivity</div>
+    <h1 class="headline" style="font-family:'Inter',system-ui,sans-serif;font-size:clamp(1.4rem,2.8vw,2.2rem); margin-bottom:6px;">What metrics does our DevEx initiative <span style="color:var(--cyan-soft);">(EngThrive)</span> track?</h1>
+    <div class="accent-line anim-child"></div>
+
+    <div class="scece-list anim-child">
+      <div class="scece-row S">
+        <div class="letter">S</div>
+        <div class="pill">ES Satisfaction (NSAT)</div>
+        <div class="body">A measure of satisfaction that developers have with, <em>"The engineering system you use at Microsoft."</em></div>
+      </div>
+      <div class="scece-row C">
+        <div class="letter">C</div>
+        <div class="pill">Code Review Dwell</div>
+        <div class="body">Capturing one aspect of collaboration, dwell is the delta between when one dev creates a Pull Request (PR) and another acts on it.</div>
+      </div>
+      <div class="scece-row E1">
+        <div class="letter">E</div>
+        <div class="pill">Time-To-First-PR</div>
+        <div class="body">The time between when a new hire starts at Microsoft and when they complete their first PR.</div>
+      </div>
+      <div class="scece-row E2">
+        <div class="letter">E</div>
+        <div class="pill">PR Completion Time</div>
+        <div class="body">The delta between when a PR is created and when it is successfully closed.</div>
+      </div>
+      <div class="scece-row E3">
+        <div class="letter">E</div>
+        <div class="pill">Uninterrupted Focus Time</div>
+        <div class="body">The amount of uninterrupted time a dev has for deep thinking and creative problem solving.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ SLIDE 5: Prompts vs Context Engineering ════ -->
+  <!-- ════ SLIDE 7: Prompts vs Context Engineering (text reproduction) ════ -->
+  <div class="slide" data-slide="6">
+    <div class="page-num">07 / 25</div>
+    <div class="page-tag"><span class="dot" style="background:var(--purple);box-shadow:0 0 8px var(--purple);"></span> Repeatable Patterns</div>
+    <h1 class="headline" style="font-size:clamp(1.4rem,2.8vw,2.2rem); margin-bottom:24px;">Prompts of the past vs context engineering</h1>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:24px; max-width:1100px; width:100%;" class="anim-child">
+      <!-- Left: Early 2025 -->
+      <div style="border:1px solid var(--border); border-radius:var(--r-lg); background:var(--bg-1); padding:32px 30px; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center;">
+        <h3 style="color:var(--text-0); font-size:1.3rem; font-weight:700; margin-bottom:36px;">Prompts, early 2025</h3>
+        <p style="font-family:'Source Serif 4',Georgia,serif; font-size:1.8rem; font-weight:700; color:var(--text-0); line-height:1.3; margin-bottom:28px;">"Find and fix the bug, NOW!"</p>
+        <p style="color:var(--text-3); font-size:.88rem; font-style:italic;">(after 3 chat turns that broke production)</p>
+      </div>
+      <!-- Right: Late 2025 -->
+      <div style="border:1px solid var(--border); border-radius:var(--r-lg); background:var(--bg-1); padding:28px 26px;">
+        <h3 style="color:var(--text-0); font-size:1.3rem; font-weight:700; margin-bottom:20px; text-align:center;">Prompts, late 2025</h3>
+        <div style="background:var(--bg-2); border:1px solid var(--border-soft); border-radius:var(--r-md); padding:18px 20px; font-family:'JetBrains Mono',monospace; font-size:.78rem; line-height:1.65; color:var(--text-1);">
+          <span style="color:var(--green);">&lt;!-- File debug-az.prompt.md --&gt;</span><br/>
+          You are an expert debugger, specialized in debugging complex programming issues.<br/><br/>
+          You are particularly great at debugging this project, which architecture and quirks can be consulted in the <span style="color:var(--cyan);">[architecture document](./docs/architecture.md)</span>.<br/><br/>
+          Follow these steps:<br/><br/>
+          1. Review the <span style="color:var(--cyan);">[error logs](./logs/error.log)</span> and identify the root cause.<br/><br/>
+          2. Use the <span style="color:var(--cyan);">`azmcp-monitor-log-query`</span> MCP tool to retrieve infrastructure logs from Azure.<br/><br/>
+          3. Once you find the root cause, think about 3 potential solutions with trade-offs<br/><br/>
+          4. Present your root cause analysis and suggested solutions with trade-offs to the user and seek validation before proceeding with fixes – do not change any files.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ SLIDE 8: Agentic Primitives ════ -->
+  <div class="slide" data-slide="7">
+    <div class="page-num">08 / 25</div>
+    <div class="page-tag"><span class="dot" style="background:var(--purple);box-shadow:0 0 8px var(--purple);"></span> Repeatable Patterns</div>
+    <h1 class="headline" style="font-size:clamp(1.4rem,2.8vw,2.2rem); margin-bottom:24px;">Agentic Primitives</h1>
+
+    <div class="prim-grid anim-child">
+      <div class="prim-card">
+        <h4>Copilot-Instructions.md</h4>
+        <ul style="color:var(--text-2);font-size:.85rem;line-height:1.6;padding-left:18px;margin:0;">
+          <li>Always included in every chat request.</li>
+          <li>For broad, workspace-wide coding standards.</li>
+          <li>Works across multiple editors (VS Code, Visual Studio, GitHub.com)</li>
+        </ul>
+      </div>
+      <div class="prim-card">
+        <h4>.instructions.md</h4>
+        <ul style="color:var(--text-2);font-size:.85rem;line-height:1.6;padding-left:18px;margin:0;">
+          <li>Task or context-specific instructions that can target specific files or patterns.</li>
+          <li>Auto/manual inclusion</li>
+          <li>Provides more granular, task-specific instructions</li>
+        </ul>
+      </div>
+      <div class="prim-card">
+        <h4>.prompt.md</h4>
+        <ul style="color:var(--text-2);font-size:.85rem;line-height:1.6;padding-left:18px;margin:0;">
+          <li>Used for fine tuning responses</li>
+          <li>Customizes how Copilot generates code in specific contexts.</li>
+          <li>Creates reusable prompts for common tasks</li>
+        </ul>
+      </div>
+      <div class="prim-card">
+        <h4>.agent.md</h4>
+        <ul style="color:var(--text-2);font-size:.85rem;line-height:1.6;padding-left:18px;margin:0;">
+          <li>Sets persona</li>
+          <li>Configure which tools the AI can access</li>
+          <li>Defines behaviour, sets tone and best practices</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ SLIDE 9: AI Native Dev Flywheel ════ -->
+  <div class="slide" data-slide="8">
+    <div class="page-num">09 / 25</div>
+    <div class="page-tag"><span class="dot" style="background:var(--purple);box-shadow:0 0 8px var(--purple);"></span> Repeatable Patterns</div>
+
+    <div class="flywheel-layout anim-child" style="gap:16px;">
+      <div class="flywheel-text">
+        <h2>The AI Native<br/>Dev Flywheel</h2>
+        <p>Trust compounds. Delegation accelerates.<br/>The more you use it, the better it gets.</p>
+      </div>
+      <div class="flywheel-img" style="border:none;background:transparent;box-shadow:none;">
+        <img src="assets/flywheel_box.png" alt="AI Native Dev Flywheel — Better Primitives → Reliable Results → Higher Trust → More Delegation → Developer Feedback" />
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ SLIDE 9: Agents within our workflow ════ -->
+  <div class="slide" data-slide="9">
+    <div class="page-num">10 / 25</div>
+    <div class="page-tag"><span class="dot" style="background:var(--purple);box-shadow:0 0 8px var(--purple);"></span> Repeatable Patterns</div>
+    <h1 class="headline" style="font-size:clamp(1.4rem,2.8vw,2.2rem); margin-bottom:8px;">As a result of that trust</h1>
+    <p style="color:var(--text-2);font-size:.95rem;margin-bottom:24px;">Agents within our workflow</p>
+
+    <div class="slide-image-wrap" style="max-width:1000px;">
+      <img src="assets/slide6_export.png" alt="Agents within our workflow" style="width:100%;height:auto;border-radius:var(--r-lg);border:1px solid var(--border);" />
+    </div>
+  </div>
+
+  <!-- ════ SLIDE 11: Spec-driven development ════ -->
+  <div class="slide" data-slide="10">
+    <div class="page-num">11 / 25</div>
+    <div class="page-tag"><span class="dot" style="background:var(--purple);box-shadow:0 0 8px var(--purple);"></span> Repeatable Patterns</div>
+    <h1 class="headline" style="font-size:clamp(1.4rem,2.8vw,2.2rem); margin-bottom:24px;">Spec-driven development</h1>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px; max-width:900px; width:100; margin-bottom:20px;" class="anim-child">
+      <div style="border:1px solid var(--border); border-radius:var(--r-lg); background:linear-gradient(135deg,rgba(58,175,255,.08),transparent 60%),var(--bg-1); padding:28px 26px;">
+        <h3 style="color:var(--cyan-soft); font-size:1.1rem; font-weight:700; margin-bottom:10px;">SpecKit</h3>
+        <p style="color:var(--text-1); font-size:.95rem; line-height:1.55;">A rigorous framework for Spec Driven Development.</p>
+      </div>
+      <div style="border:1px solid var(--border); border-radius:var(--r-lg); background:linear-gradient(135deg,rgba(179,146,240,.08),transparent 60%),var(--bg-1); padding:28px 26px;">
+        <h3 style="color:var(--purple); font-size:1.1rem; font-weight:700; margin-bottom:10px;">Spec Driven Development</h3>
+        <p style="color:var(--text-1); font-size:.95rem; line-height:1.55;">A methodology for producing deterministic, reviewable output from AI agents.</p>
+      </div>
+    </div>
+
+    <div class="spec-insight anim-child" style="max-width:900px; width:100%;">
+      <div class="num">19 ↔ 19</div>
+      <div>
+        <div style="color:var(--text-0);font-weight:600;font-size:.95rem;">Repos into context vs Specs into context</div>
+        <div style="color:var(--text-2);font-size:.82rem;">Each component gets its own spec — one-to-one mapping of intent to implementation.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ SLIDE 11: Plan → Implement ════ -->
+  <div class="slide" data-slide="11">
+    <div class="page-num">12 / 25</div>
+    <div class="page-tag"><span class="dot" style="background:var(--purple);box-shadow:0 0 8px var(--purple);"></span> Repeatable Patterns</div>
+    <h1 class="headline" style="font-size:clamp(1.4rem,2.8vw,2.2rem); margin-bottom:8px;">Implementing complex tasks</h1>
+    <p style="color:var(--text-2);font-size:1rem;margin-bottom:28px;">Create explicit implementation pipelines / workflows</p>
+
+    <div class="plan-flow anim-child">
+      <div class="plan-step">
+        <div class="step-num" style="background:var(--cyan);">1</div>
+        <h3>Plan</h3>
+        <p>Break the task into discrete, scoped steps. Define acceptance criteria before writing code.</p>
+      </div>
+      <div class="plan-arrow">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>
+      <div class="plan-step">
+        <div class="step-num" style="background:var(--purple);">2</div>
+        <h3>Spec</h3>
+        <p>Create spec files that capture context, constraints, and expected interfaces for each component.</p>
+      </div>
+      <div class="plan-arrow">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>
+      <div class="plan-step">
+        <div class="step-num" style="background:var(--green);">3</div>
+        <h3>Implement</h3>
+        <p>Hand the spec to the agent — it generates code that meets your defined contract.</p>
+      </div>
+      <div class="plan-arrow">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>
+      <div class="plan-step">
+        <div class="step-num" style="background:var(--gold);">4</div>
+        <h3>Validate</h3>
+        <p>Review, test, iterate. Feed results back to improve specs for the next cycle.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ SLIDE 13: Model selection ════ -->
+  <div class="slide" data-slide="12">
+    <div class="page-num">13 / 25</div>
+    <div class="page-tag"><span class="dot" style="background:var(--purple);box-shadow:0 0 8px var(--purple);"></span> Repeatable Patterns</div>
+    <h1 class="headline" style="font-size:clamp(1.4rem,2.8vw,2.2rem); margin-bottom:24px;">Model selection</h1>
+
+    <div style="text-align:center;" class="anim-child">
+      <p style="color:var(--text-2);font-size:1.05rem;margin-bottom:28px;max-width:700px;margin-left:auto;margin-right:auto;">
+        GitHub Copilot supports multiple models — choose the right one for cost, speed, and quality trade-offs.
+      </p>
+      <a href="./assets/copilot-models-tabbed.html?clawpilotTheme=dark" target="_blank" rel="noopener"
+         style="display:inline-flex;align-items:center;gap:10px;padding:14px 32px;background:linear-gradient(135deg,var(--cyan),var(--violet));color:#fff;font-weight:700;font-size:1.05rem;border-radius:999px;text-decoration:none;transition:transform .2s,box-shadow .2s;">
+        Model reference ↗
+      </a>
+    </div>
+  </div>
+
+
+  <!-- ════ SLIDE 14: Brownfield / Greenfield ════ -->
+  <div class="slide" data-slide="13">
+    <div class="page-num">14 / 25</div>
+    <div class="page-tag"><span class="dot" style="background:var(--purple);box-shadow:0 0 8px var(--purple);"></span> Repeatable Patterns</div>
+    <h1 class="headline" style="font-size:clamp(1.4rem,2.8vw,2.2rem); margin-bottom:28px;">Brownfield / Greenfield development</h1>
+
+    <div class="bf-gf-grid anim-child">
+      <div class="bf-gf-card brownfield">
+        <div class="icon">🏗️</div>
+        <h3>Brownfield</h3>
+        <p>Working within existing codebases — navigating legacy patterns, established conventions, and existing architecture. Context engineering is critical here.</p>
+      </div>
+      <div class="bf-gf-card greenfield">
+        <div class="icon">🌱</div>
+        <h3>Greenfield</h3>
+        <p>Starting from scratch — scaffolding new projects, defining architecture, and establishing patterns. Spec-driven development shines here.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ SLIDE 16: Agent Package Manager ════ -->
+  <div class="slide" data-slide="14">
+    <div class="page-num">15 / 25</div>
+    <div class="page-tag"><span class="dot" style="background:var(--purple);box-shadow:0 0 8px var(--purple);"></span> Repeatable Patterns</div>
+    <h1 class="headline" style="font-size:clamp(1.4rem,2.8vw,2.2rem); margin-bottom:24px;">Agent Package Manager</h1>
+
+    <div style="max-width:800px;width:100%;border:1px solid var(--border);border-radius:var(--r-lg);background:linear-gradient(135deg,rgba(58,175,255,.06),transparent 60%),var(--bg-1);padding:36px 36px;" class="anim-child">
+      <p style="color:var(--text-1);font-size:1.05rem;line-height:1.65;margin-bottom:20px;">
+        A centralized registry for discovering, sharing, and installing pre-built agent configurations — <b style="color:var(--cyan-soft);">instructions</b>, <b style="color:var(--green-soft);">prompts</b>, <b style="color:var(--purple);">agent definitions</b>, and <b style="color:var(--gold);">skills</b>.
+      </p>
+      <p style="color:var(--text-2);font-size:.95rem;line-height:1.6;">
+        Think <span style="color:var(--cyan-soft);font-family:'JetBrains Mono',monospace;font-size:.88rem;">npm</span> for agent primitives — install proven patterns from the community instead of writing them from scratch. Enables teams to standardize and distribute best practices across projects.
+      </p>
+    </div>
+  </div>
+
+  <!-- ════ SLIDE 17: Agent gambling (PPT slide 7) ════ -->
+  <div class="slide" data-slide="15">
+    <div class="page-num">16 / 25</div>
+    <div class="page-tag"><span class="dot" style="background:var(--gold);box-shadow:0 0 8px var(--gold);"></span> Token Optimization</div>
+
+    <div class="gambling-layout anim-child">
+      <h1><span class="accent">Agent gambling</span><br/>is no longer<br/>sustainable</h1>
+      <p class="sub">When tokens are cheap, agent accuracy is not important. Once they are not, they require engineering work.</p>
+    </div>
+  </div>
+
+  <!-- ════ SLIDE 18: Provide context (PPT slide 8) ════ -->
+  <div class="slide" data-slide="16">
+    <div class="page-num">17 / 25</div>
+    <div class="page-tag"><span class="dot" style="background:var(--gold);box-shadow:0 0 8px var(--gold);"></span> Token Optimization</div>
+
+    <div class="big-quote anim-child">
+      <h1><span class="g">Provide</span> as little<br/>context as possible, <span class="dim">but</span><br/><span class="g">as much as required.</span></h1>
+    </div>
+  </div>
+
+  <!-- ════ SLIDE 19: Two biggest levers (PPT slide 9) ════ -->
+  <div class="slide" data-slide="17">
+    <div class="page-num">18 / 25</div>
+    <div class="page-tag"><span class="dot" style="background:var(--gold);box-shadow:0 0 8px var(--gold);"></span> Token Optimization</div>
+
+    <div class="levers-header anim-child">
+      <h1>The two biggest levers for<br/><span class="accent">optimizing quality &amp; tokens</span></h1>
+    </div>
+
+    <div class="levers-grid anim-child">
+      <div class="lever-col">
+        <div class="lever-icon">&gt;_</div>
+        <h3>Model choice &amp; auto mode</h3>
+        <div class="lever-item">
+          <div class="label">Reasoning models (Opus, GPT-5.5)</div>
+          <div class="desc">for sync tasks like planning, architecture, debugging.</div>
+        </div>
+        <div class="lever-item">
+          <div class="label">Mid-tier models (Sonnet, GPT5.4)</div>
+          <div class="desc">for async implementation.</div>
+        </div>
+        <div class="lever-item">
+          <div class="label">Low-tier (Haiku, GPT-mini)</div>
+          <div class="desc">for small refactorings, repetitive tasks, doc updates.</div>
+        </div>
+        <div class="lever-item">
+          <div class="label">Auto Mode</div>
+          <div class="desc">as the lazy default.</div>
+        </div>
+      </div>
+      <div class="lever-col">
+        <div class="lever-icon">&gt;_</div>
+        <h3>Provide only relevant context</h3>
+        <div class="lever-item">
+          <div class="desc">As <b style="color:var(--text-0);">much as required</b>, as little as necessary.</div>
+        </div>
+        <div class="lever-item">
+          <div class="desc">Context Engineering as your <b style="color:var(--text-0);">guidance and upskill potential</b>.</div>
+        </div>
+        <div class="lever-item">
+          <div class="desc">Compacting sessions can be helpful – but they can also lead to valuable information being lost. <span class="underline">Used it cautiously.</span></div>
+        </div>
+        <div class="lever-item">
+          <div class="desc">Use <b style="color:var(--text-0);">/clear often</b>, for each new task.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ SLIDE 20: Guiding the agent (PPT slide 10) ════ -->
+  <div class="slide" data-slide="18">
+    <div class="page-num">19 / 25</div>
+    <div class="page-tag"><span class="dot" style="background:var(--gold);box-shadow:0 0 8px var(--gold);"></span> Token Optimization</div>
+
+    <div class="guide-header anim-child">
+      <div class="eyebrow">Guiding the agent</div>
+      <h1>Your Prompt</h1>
+    </div>
+
+    <div class="guide-grid anim-child">
+      <div class="guide-cell">
+        <div class="check">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <h3>Be precise.</h3>
+        <p>Add description.</p>
+      </div>
+      <div class="guide-cell">
+        <div class="check">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <h3>Add stop signals.</h3>
+        <p>"Stop if X."</p>
+      </div>
+      <div class="guide-cell">
+        <div class="check">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <h3>Add known context beforehand.</h3>
+        <p>Files, Folders, Websites, etc.</p>
+      </div>
+    </div>
+
+    <div class="guide-bar anim-child">
+      <div style="display:flex;gap:2px;">
+        <div class="guide-bar-item" style="background:var(--bg-2);border-radius:6px 0 0 6px;border:1px solid var(--border);">
+          <div class="guide-bar-label">Always on</div>
+          <div style="color:var(--text-1);font-size:.7rem;">System &amp; Tools</div>
+        </div>
+        <div class="guide-bar-item" style="background:rgba(139,111,239,.2);border-radius:0 6px 6px 0;border:1px solid var(--violet);">
+          <div class="guide-bar-label">Always on</div>
+          <div style="color:var(--purple);font-size:.7rem;">Prompt</div>
+        </div>
+      </div>
+      <div style="flex:1;background:rgba(63,185,80,.08);border:1px solid rgba(63,185,80,.3);border-radius:6px;margin-left:8px;"></div>
+    </div>
+  </div>
+
+  <!-- ════ SLIDE 21: Research → Plan → Implement (PPT slide 11) ════ -->
+  <div class="slide" data-slide="19">
+    <div class="page-num">20 / 25</div>
+    <div class="page-tag"><span class="dot" style="background:var(--gold);box-shadow:0 0 8px var(--gold);"></span> Token Optimization</div>
+
+    <div class="rpi-layout anim-child">
+      <div class="eyebrow">Divide and conquer your work</div>
+      <h1>Research → Plan → Implement</h1>
+
+      <div class="rpi-prompt">"I want to change X.<br/>What files are relevant?"</div>
+
+      <!-- /research row -->
+      <div class="rpi-row">
+        <div class="rpi-label">
+          <div class="cmd">/research</div>
+          <div class="model">Gemini 2.5 Pro</div>
+        </div>
+        <div class="rpi-blocks">
+          <div class="rpi-block sys">System<br/>Prompt</div>
+          <div class="rpi-block prompt">Prompt</div>
+          <div class="rpi-block file bad">File</div>
+          <div class="rpi-block file bad">File</div>
+          <div class="rpi-block file ok">File</div>
+          <div class="rpi-block file bad">File</div>
+          <div class="rpi-block file bad">File</div>
+          <div class="rpi-block file ok">File</div>
+          <div class="rpi-block plan">Plan<br/>Input</div>
+          <div class="rpi-bar"></div>
+        </div>
+      </div>
+
+      <div class="rpi-conn"></div>
+
+      <!-- /plan row -->
+      <div class="rpi-row">
+        <div class="rpi-label">
+          <div class="cmd">/plan</div>
+          <div class="model">Opus 4.7</div>
+        </div>
+        <div class="rpi-blocks">
+          <div class="rpi-block sys">System<br/>Prompt</div>
+          <div class="rpi-block prompt">Prompt</div>
+          <div class="rpi-block plan">Plan<br/>Input</div>
+          <div class="rpi-block file">File</div>
+          <div class="rpi-block file">File</div>
+          <div class="rpi-block reason">Reasoning</div>
+          <div class="rpi-block spec">Precise<br/>Spec</div>
+          <div class="rpi-bar"></div>
+        </div>
+      </div>
+
+      <div class="rpi-conn"></div>
+
+      <!-- /fleet row -->
+      <div class="rpi-row">
+        <div class="rpi-label">
+          <div class="cmd">/fleet</div>
+          <div class="model">GPT 5.4</div>
+        </div>
+        <div class="rpi-blocks">
+          <div class="rpi-block sys">System<br/>Prompt</div>
+          <div class="rpi-block prompt">Prompt</div>
+          <div class="rpi-block spec">Precise<br/>Spec</div>
+          <div class="rpi-block file">File</div>
+          <div class="rpi-block file">File</div>
+          <div class="rpi-block change">Change Calls</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ SLIDE 22: Agent Configs (PPT slide 12) ════ -->
+  <div class="slide" data-slide="20">
+    <div class="page-num">21 / 25</div>
+    <div class="page-tag"><span class="dot" style="background:var(--gold);box-shadow:0 0 8px var(--gold);"></span> Token Optimization</div>
+
+    <div class="configs-layout anim-child">
+      <h1>Agent Configs</h1>
+      <div class="config-list">
+        <div class="config-row">
+          <div class="check"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div class="name">Persistent instructions</div>
+          <div class="path">COPILOT-INSTRUCTIONS.MD</div>
+        </div>
+        <div class="config-row">
+          <div class="check"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div class="name">Custom Agents.</div>
+          <div class="path">./GITHUB/AGENTS/*.AGENT.MD</div>
+        </div>
+        <div class="config-row">
+          <div class="check"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div class="name">Skills</div>
+          <div class="path">./GITHUB/SKILLS/*/SKILL.MD</div>
+        </div>
+        <div class="config-row">
+          <div class="check"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div class="name">MCP</div>
+          <div class="path"></div>
+        </div>
+        <div class="config-row">
+          <div class="check"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div class="name">Subagents</div>
+          <div class="path"></div>
+        </div>
+        <div class="config-row">
+          <div class="check"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div class="name">Scoped instructions.</div>
+          <div class="path">./GITHUB/INSTRUCTIONS/*.INSTRUCTIONS.MD</div>
+        </div>
+        <div class="config-row">
+          <div class="check"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div class="name">Prompt Files</div>
+          <div class="path">./.GITHUB/PROMPTS/*.PROMPT.MD</div>
+        </div>
+        <div class="config-row">
+          <div class="check"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div class="name">Copilot Memory</div>
+          <div class="path"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ SLIDE 23: Power User Guidance (PPT slide 13) ════ -->
+  <div class="slide" data-slide="21">
+    <div class="page-num">22 / 25</div>
+    <div class="page-tag"><span class="dot" style="background:var(--gold);box-shadow:0 0 8px var(--gold);"></span> Token Optimization</div>
+
+    <div class="power-layout anim-child">
+      <div class="power-left">
+        <div class="eyebrow">Metrics</div>
+        <h1>Power User Guidance</h1>
+        <p class="caveat">These Tips require good <b>knowledge and time-invest</b>, as they are conditional and / or come with trade-offs.</p>
+      </div>
+      <div class="power-tips">
+        <div class="power-tip">
+          <h3>Think in Code</h3>
+          <p>Prefer creating scripts to analyze files over feeding it to AI.</p>
+        </div>
+        <div class="power-tip">
+          <h3>Consider CLIs vs. MCPs</h3>
+          <p>CLI Tools can be more optimal in certain scenarios due to less static tokens.</p>
+        </div>
+        <div class="power-tip">
+          <h3>Improve Shell Outputs</h3>
+          <p>Shell outputs can be extremely long – use something like <a href="https://github.com/rtk-ai/rtk" target="_blank" rel="noopener">https://github.com/rtk-ai/rtk</a> to reduce their outputs.</p>
+        </div>
+        <div class="power-tip">
+          <h3>Run "/chronicle tip" regularly</h3>
+          <p>Analyze your usage in Copilot CLI to find improvement areas.</p>
+        </div>
+        <div class="power-tip">
+          <h3>Collapse Tool Calls</h3>
+          <p>Using something like <a href="https://github.com/jsturtevant/copilot-codeact-plugin" target="_blank" rel="noopener">copilot-codeact-plugin</a> can help collapse multiple tool calls into one.</p>
+        </div>
+        <div class="power-tip">
+          <h3>Model Specific Context Optimization</h3>
+          <p>Models behave different and can be tweaked.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ SLIDE 24: 5 things you can start doing today (PPT slide 14) ════ -->
+  <div class="slide" data-slide="22">
+    <div class="page-num">23 / 25</div>
+    <div class="page-tag"><span class="dot" style="background:var(--gold);box-shadow:0 0 8px var(--gold);"></span> Token Optimization</div>
+
+    <div class="today-layout anim-child">
+      <div class="today-left">
+        <div class="eyebrow">Summary</div>
+        <h1>5 things you can start doing today</h1>
+      </div>
+      <div class="today-list">
+        <div class="today-item">
+          <div class="check"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <p>Chose the right model for the right task.</p>
+        </div>
+        <div class="today-item">
+          <div class="check"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <p>Provide clear guidance in your prompts.</p>
+        </div>
+        <div class="today-item">
+          <div class="check"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <p>Research – Plan – Implement.</p>
+        </div>
+        <div class="today-item">
+          <div class="check"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <p>Provide deterministic guardrails (tests, linters, security scans etc.).</p>
+        </div>
+        <div class="today-item">
+          <div class="check"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <p>Maintain a concise, human-written copilot-instructions.md. Use it as agent-miss log &amp; to trim outputs.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ SLIDE 25: Cost Governance ════ -->
+  <div class="slide" data-slide="23">
+    <div class="page-num">24 / 25</div>
+    <div class="page-tag"><span class="dot" style="background:var(--gold);box-shadow:0 0 8px var(--gold);"></span> Cost Governance</div>
+    <h1 class="headline" style="font-size:clamp(1.4rem,2.8vw,2.2rem); margin-bottom:24px;">Cost Governance</h1>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;max-width:1100px;width:100%;" class="anim-child">
+      <div style="border:1px solid var(--border);border-radius:var(--r-lg);background:var(--bg-1);padding:28px 26px;">
+        <h3 style="color:var(--text-0);font-size:1.15rem;font-weight:700;margin-bottom:14px;">Things to do today</h3>
+        <p style="color:var(--text-2);font-size:.92rem;line-height:1.55;margin-bottom:18px;">Practical steps for managing token costs and enforcing governance across your teams.</p>
+        <a href="https://share.articulate.com/pmpueguUReJvPTq-7f_aY#/lessons/K35jvv4-mvv8UjVfOenLrpg845UA413F" target="_blank" rel="noopener"
+           style="display:inline-flex;align-items:center;gap:8px;padding:10px 22px;background:linear-gradient(135deg,var(--cyan),var(--violet));color:#fff;font-weight:600;font-size:.9rem;border-radius:999px;text-decoration:none;">
+          Cost governance guide ↗
+        </a>
+      </div>
+      <div style="border:1px solid var(--border);border-radius:var(--r-lg);background:var(--bg-1);padding:28px 26px;">
+        <h3 style="color:var(--text-0);font-size:1.15rem;font-weight:700;margin-bottom:14px;">Model enforcement</h3>
+        <div style="border:1px solid var(--border);border-radius:var(--r-md);overflow:hidden;">
+          <img src="assets/ModelSelection.png" alt="Model enforcement configuration" style="width:100%;height:auto;display:block;" />
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ SLIDE 26: Q&A ════ -->
+  <div class="slide" data-slide="24">
+    <div class="page-num">25 / 25</div>
+    <div class="page-tag"><span class="dot" style="background:var(--cyan);box-shadow:0 0 8px var(--cyan);"></span> Q &amp; A</div>
+
+    <div style="text-align:center;" class="anim-child">
+      <h1 style="font-size:clamp(3rem,7vw,5rem);font-weight:800;color:var(--text-0);margin-bottom:20px;">Q &amp; A</h1>
+      <p style="color:var(--text-2);font-size:1.15rem;">Open discussion</p>
+    </div>
+  </div>
+
+</div>
+
+<!-- ── Bottom nav ───────────────────────────────── -->
+<div class="arrow-nav">
+  <button class="arrow-btn" id="prev" disabled>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+  </button>
+  <span class="page-indicator" id="pageInd">1 / 25</span>
+  <button class="arrow-btn" id="next">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+  </button>
+</div>
+
+<div class="key-hint"><kbd>&#8592;</kbd> <kbd>&#8594;</kbd> navigate &nbsp; <kbd>Space</kbd> next</div>
+
+<script>
+(() => {
+  const slides = document.querySelectorAll('.slide');
+  const total  = slides.length;
+  let cur = 0;
+
+  const prevBtn  = document.getElementById('prev');
+  const nextBtn  = document.getElementById('next');
+  const pageInd  = document.getElementById('pageInd');
+  const progFill = document.getElementById('progressFill');
+  const railDots = document.querySelectorAll('.rail a');
+
+  function go(idx) {
+    if (idx < 0 || idx >= total || idx === cur) return;
+    const dir = idx > cur ? 1 : -1;
+    const prev = cur;
+
+    // Exit old slide in the correct direction
+    slides[prev].classList.remove('active');
+    slides[prev].classList.add(dir > 0 ? 'exit-left' : 'exit-right');
+
+    // Enter new slide from the opposite side
+    cur = idx;
+    // Briefly set the starting position without transition
+    slides[cur].style.transition = 'none';
+    slides[cur].style.transform = dir > 0 ? 'translateX(60px)' : 'translateX(-60px)';
+    slides[cur].style.opacity = '0';
+    // Force reflow
+    void slides[cur].offsetWidth;
+    // Re-enable transition and activate
+    slides[cur].style.transition = '';
+    slides[cur].style.transform = '';
+    slides[cur].style.opacity = '';
+    slides[cur].classList.add('active');
+
+    setTimeout(() => {
+      slides[prev].classList.remove('exit-left', 'exit-right');
+    }, 500);
+
+    prevBtn.disabled = cur === 0;
+    nextBtn.disabled = cur === total - 1;
+    pageInd.textContent = (cur + 1) + ' / ' + total;
+    progFill.style.width = ((cur + 1) / total * 100) + '%';
+
+    railDots.forEach(d => d.classList.toggle('active', +d.dataset.idx === cur));
+  }
+
+  prevBtn.addEventListener('click', () => go(cur - 1));
+  nextBtn.addEventListener('click', () => go(cur + 1));
+
+  railDots.forEach(d => d.addEventListener('click', () => go(+d.dataset.idx)));
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); go(cur + 1); }
+    if (e.key === 'ArrowLeft') { e.preventDefault(); go(cur - 1); }
+    if (e.key === 'Home') { e.preventDefault(); go(0); }
+    if (e.key === 'End') { e.preventDefault(); go(total - 1); }
+  });
+
+  let tx = 0;
+  document.addEventListener('touchstart', e => { tx = e.touches[0].clientX; });
+  document.addEventListener('touchend', e => {
+    const dx = e.changedTouches[0].clientX - tx;
+    if (Math.abs(dx) > 50) go(cur + (dx < 0 ? 1 : -1));
+  });
+
+  // Agenda item click handlers
+  document.querySelectorAll('.agenda-item[data-goto]').forEach(item => {
+    item.addEventListener('click', () => go(+item.dataset.goto));
+  });
+
+  // Init
+  progFill.style.width = ((cur + 1) / total * 100) + '%';
+  railDots[0] && railDots[0].classList.add('active');
+})();
+</script>
+
+</body>
+</html>
