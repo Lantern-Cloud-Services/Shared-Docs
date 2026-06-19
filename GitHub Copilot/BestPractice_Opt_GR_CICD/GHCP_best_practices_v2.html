@@ -1,0 +1,1782 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>GitHub Copilot — Best Practices &amp; Strategy</title>
+<script>
+  (() => {
+    const param = new URLSearchParams(window.location.search).get("scoutTheme");
+    const theme =
+      param || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    document.documentElement.setAttribute("data-theme", theme);
+  })();
+</script>
+<style>
+  :root {
+    color-scheme: light;
+    --cp-bg: #f7f4ef;
+    --cp-bg-elevated: #fcfbf8;
+    --cp-surface: #ffffff;
+    --cp-surface-soft: #f5f5f5;
+    --cp-border: #dedede;
+    --cp-border-strong: #919191;
+    --cp-text: #242424;
+    --cp-text-muted: #5c5c5c;
+    --cp-text-soft: #6f6f6f;
+    --cp-accent: #b11f4b;
+    --cp-accent-hover: #9a1a41;
+    --cp-accent-soft: rgba(177, 31, 75, 0.08);
+    --cp-accent-fg: #ffffff;
+    --cp-success: #16a34a;
+    --cp-danger: #dc2626;
+    --cp-warning: #f59e0b;
+    --cp-link: #0078d4;
+    --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.12);
+    --cp-overlay: rgba(255, 255, 255, 0.8);
+    --cp-panel: rgba(255, 255, 255, 0.86);
+    --cp-panel-strong: rgba(255, 255, 255, 0.96);
+    --cp-sheen: rgba(255, 255, 255, 0.55);
+    --cp-highlight: rgba(177, 31, 75, 0.12);
+  }
+  html[data-theme="dark"] {
+    color-scheme: dark;
+    --cp-bg: #3d3b3a;
+    --cp-bg-elevated: #343231;
+    --cp-surface: #292929;
+    --cp-surface-soft: #2e2e2e;
+    --cp-border: #474747;
+    --cp-border-strong: #5f5f5f;
+    --cp-text: #dedede;
+    --cp-text-muted: #919191;
+    --cp-text-soft: #b0b0b0;
+    --cp-accent: #fd8ea1;
+    --cp-accent-hover: #fb7b91;
+    --cp-accent-soft: rgba(253, 142, 161, 0.14);
+    --cp-accent-fg: #1a1a1a;
+    --cp-success: #4ade80;
+    --cp-danger: #f87171;
+    --cp-warning: #fbbf24;
+    --cp-link: #4da6ff;
+    --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.32);
+    --cp-overlay: rgba(41, 41, 41, 0.88);
+    --cp-panel: rgba(41, 41, 41, 0.72);
+    --cp-panel-strong: rgba(41, 41, 41, 0.96);
+    --cp-sheen: rgba(255, 255, 255, 0.04);
+    --cp-highlight: rgba(253, 142, 161, 0.12);
+  }
+
+  /* ── Presentation Design Tokens ──────────── */
+  :root {
+    --bg-0: #07090f;
+    --bg-1: #0d1117;
+    --bg-2: #131a26;
+    --bg-3: #1b2436;
+    --border: #243047;
+    --border-soft: #1a2336;
+    --text-0: #f1f5fb;
+    --text-1: #cfd6e4;
+    --text-2: #8b95ab;
+    --text-3: #5a6378;
+    --cyan: #3aafff;
+    --cyan-soft: #75c7ff;
+    --green: #3fb950;
+    --green-soft: #7ee787;
+    --red: #f85149;
+    --purple: #b392f0;
+    --violet: #8b6fef;
+    --pink: #f0a3b7;
+    --teal: #59f0d0;
+    --gold: #e3b341;
+    --orange: #e97132;
+    --shadow: 0 10px 40px rgba(0,0,0,.45);
+    --r-lg: 18px;
+    --r-md: 12px;
+    --r-sm: 8px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    height: 100%; overflow: hidden;
+    font-family: 'Segoe UI', Aptos, Calibri, -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg-0);
+    color: var(--text-1);
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  body::before {
+    content: "";
+    position: fixed; inset: 0;
+    background:
+      radial-gradient(900px 600px at 85% -10%, rgba(58,175,255,.08), transparent 60%),
+      radial-gradient(700px 500px at -10% 30%, rgba(179,146,240,.06), transparent 60%),
+      radial-gradient(800px 600px at 50% 120%, rgba(63,185,80,.05), transparent 60%);
+    pointer-events: none; z-index: 0;
+  }
+
+  /* ── Top nav bar ────────────────────────────────── */
+  .topnav {
+    position: fixed; top: 0; left: 0; right: 0;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 32px;
+    background: rgba(7,9,15,.72);
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border-soft);
+    z-index: 100;
+  }
+  .topnav .brand {
+    display: flex; align-items: center; gap: 10px;
+    font-weight: 600; color: var(--text-0); letter-spacing: .2px; font-size: 14px;
+  }
+  .topnav .brand .dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--green); box-shadow: 0 0 12px var(--green);
+  }
+  .topnav .brand svg { width: 22px; height: 22px; fill: var(--text-0); margin-right: 2px; }
+
+  /* ── Progress bar ───────────────────────────────── */
+  .progress-bar {
+    position: fixed; top: 53px; left: 0; right: 0;
+    height: 2px; background: var(--bg-2); z-index: 99;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--cyan), var(--violet));
+    transition: width .4s ease;
+  }
+
+  /* ── Side rail dots ─────────────────────────────── */
+  .rail {
+    position: fixed; right: 22px; top: 50%;
+    transform: translateY(-50%);
+    display: flex; flex-direction: column; gap: 10px; z-index: 90;
+  }
+  .rail a {
+    display: block; width: 10px; height: 10px; border-radius: 50%;
+    background: rgba(255,255,255,.10); border: 1px solid rgba(255,255,255,.15);
+    transition: all .2s; cursor: pointer; position: relative;
+  }
+  .rail a:hover { background: var(--cyan); border-color: var(--cyan); transform: scale(1.2); }
+  .rail a.active { background: var(--cyan); border-color: var(--cyan); box-shadow: 0 0 10px var(--cyan); }
+  .rail a::before {
+    content: attr(data-label);
+    position: absolute; right: 22px; top: 50%; transform: translateY(-50%);
+    white-space: nowrap; font-size: 11px; color: var(--text-2);
+    background: var(--bg-2); border: 1px solid var(--border);
+    padding: 4px 8px; border-radius: 6px;
+    opacity: 0; pointer-events: none; transition: opacity .2s;
+  }
+  .rail a:hover::before { opacity: 1; }
+  @media (max-width: 900px) { .rail { display: none; } }
+
+  /* ── Slide container ────────────────────────────── */
+  .slides-viewport { position: fixed; inset: 0; z-index: 1; }
+
+  .slide {
+    position: absolute; inset: 0;
+    padding: 90px 64px 80px;
+    display: flex; flex-direction: column;
+    justify-content: flex-start;
+    overflow-y: auto;
+    opacity: 0; transform: translateX(60px);
+    pointer-events: none;
+    transition: opacity .45s ease, transform .45s ease;
+    max-width: 1400px;
+    margin: 0 auto; left: 0; right: 0;
+  }
+  .slide.active { opacity: 1; transform: translateX(0); pointer-events: auto; }
+  .slide.exit-left { opacity: 0; transform: translateX(-60px); }
+  .slide.exit-right { opacity: 0; transform: translateX(60px); }
+  @media (max-width: 720px) { .slide { padding: 72px 22px; } }
+
+  /* ── Bottom nav arrows ──────────────────────────── */
+  .arrow-nav {
+    position: fixed; bottom: 32px; left: 50%;
+    transform: translateX(-50%);
+    display: flex; align-items: center; gap: 20px; z-index: 200;
+    background: rgba(13,17,23,.85);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--border); border-radius: 999px;
+    padding: 10px 24px;
+  }
+  .arrow-btn {
+    width: 42px; height: 42px;
+    border: 1px solid var(--border); border-radius: 50%;
+    background: var(--bg-2); color: var(--text-1);
+    display: grid; place-items: center; cursor: pointer;
+    transition: all .2s; font-size: 0;
+  }
+  .arrow-btn:hover { background: var(--cyan); color: var(--bg-0); border-color: var(--cyan); }
+  .arrow-btn:disabled { opacity: .25; cursor: default; background: var(--bg-2); color: var(--text-3); border-color: var(--border); }
+  .arrow-btn svg { width: 18px; height: 18px; }
+  .page-indicator {
+    font-family: Consolas, 'Courier New', Courier, monospace;
+    font-size: 13px; color: var(--text-2); letter-spacing: 1px;
+    min-width: 60px; text-align: center;
+  }
+
+  /* ── Typography ─────────────────────────────────── */
+  .page-tag {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 11px; letter-spacing: 2.5px; text-transform: uppercase;
+    color: var(--cyan-soft); font-weight: 600; margin-bottom: 18px;
+  }
+  .page-tag .dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--cyan); box-shadow: 0 0 8px var(--cyan);
+  }
+  .page-num {
+    position: absolute; top: 96px; right: 64px;
+    font-family: Consolas, 'Courier New', Courier, monospace;
+    font-size: 12px; color: var(--text-3); letter-spacing: 1px;
+  }
+
+  h1.headline {
+    font-weight: 700;
+    font-size: clamp(2.2rem, 4.6vw, 4rem);
+    line-height: 1.05; color: var(--text-0);
+    letter-spacing: -.02em; margin: 0 0 18px;
+  }
+  h1.headline .accent { color: var(--cyan); font-style: italic; }
+
+  .subtitle {
+    color: var(--text-2); font-size: 1.1rem;
+    max-width: 720px; line-height: 1.55; margin-bottom: 36px;
+  }
+
+  .eyebrow {
+    font-size: 11px; letter-spacing: 2.5px; text-transform: uppercase;
+    color: var(--text-2); font-weight: 600;
+  }
+
+  /* ── Agenda ─────────────────────────────────────── */
+  .agenda-list {
+    display: flex; flex-direction: column; gap: 0;
+    max-width: 780px; width: 100%;
+  }
+  .agenda-item {
+    display: flex; align-items: center; gap: 22px;
+    padding: 22px 26px;
+    border: 1px solid var(--border-soft);
+    border-bottom: none;
+    background: var(--bg-1);
+    transition: background .2s, border-color .2s;
+    cursor: pointer;
+  }
+  .agenda-item:first-child { border-radius: var(--r-lg) var(--r-lg) 0 0; }
+  .agenda-item:last-child { border-bottom: 1px solid var(--border-soft); border-radius: 0 0 var(--r-lg) var(--r-lg); }
+  .agenda-item:hover { background: var(--bg-2); border-color: var(--border); }
+  .agenda-item:hover + .agenda-item { border-top-color: var(--border); }
+
+  .agenda-num {
+    width: 44px; height: 44px; border-radius: 12px;
+    display: grid; place-items: center; flex-shrink: 0;
+    font-family: Consolas, 'Courier New', Courier, monospace;
+    font-weight: 700; font-size: .9rem;
+    color: #fff;
+  }
+  .agenda-item:nth-child(1) .agenda-num { background: linear-gradient(135deg, var(--cyan), #1f6feb); }
+  .agenda-item:nth-child(2) .agenda-num { background: linear-gradient(135deg, var(--green), #238636); }
+  .agenda-item:nth-child(3) .agenda-num { background: linear-gradient(135deg, var(--purple), var(--violet)); }
+  .agenda-item:nth-child(4) .agenda-num { background: linear-gradient(135deg, var(--gold), var(--orange)); }
+  .agenda-item:nth-child(5) .agenda-num { background: linear-gradient(135deg, var(--teal), var(--cyan)); }
+
+  .agenda-text { flex: 1; }
+  .agenda-text .title {
+    color: var(--text-0); font-weight: 600; font-size: 1.05rem;
+    margin-bottom: 3px;
+  }
+  .agenda-text .desc {
+    color: var(--text-3); font-size: .82rem;
+  }
+  .agenda-item .arrow {
+    color: var(--text-3); font-size: 20px; transition: color .2s;
+  }
+  .agenda-item:hover .arrow { color: var(--text-0); }
+
+  /* ── Primitives (4-card grid) ───────────────────── */
+  .prim-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    gap: 18px; max-width: 1200px; width: 100%;
+  }
+  .prim-card {
+    background: linear-gradient(180deg, var(--bg-2), var(--bg-1));
+    border: 1px solid var(--border); border-radius: var(--r-lg);
+    padding: 24px 20px; position: relative; overflow: hidden;
+    transition: transform .25s, border-color .25s;
+  }
+  .prim-card:hover { transform: translateY(-4px); border-color: var(--cyan); box-shadow: var(--shadow); }
+  .prim-card::before {
+    content: ""; position: absolute; left: 0; right: 0; top: 0; height: 3px;
+  }
+  .prim-card:nth-child(1)::before { background: var(--cyan); }
+  .prim-card:nth-child(2)::before { background: var(--green); }
+  .prim-card:nth-child(3)::before { background: var(--purple); }
+  .prim-card:nth-child(4)::before { background: var(--gold); }
+  .prim-card h4 {
+    font-family: Consolas, 'Courier New', Courier, monospace;
+    font-size: .85rem; margin-bottom: 10px; font-weight: 600;
+  }
+  .prim-card:nth-child(1) h4 { color: var(--cyan-soft); }
+  .prim-card:nth-child(2) h4 { color: var(--green-soft); }
+  .prim-card:nth-child(3) h4 { color: var(--purple); }
+  .prim-card:nth-child(4) h4 { color: var(--gold); }
+  .prim-card p, .prim-card ul { color: var(--text-2); font-size: .85rem; line-height: 1.5; }
+  @media (max-width: 1000px) { .prim-grid { grid-template-columns: repeat(2, 1fr); } }
+
+  /* ── Big quote ──────────────────────────────────── */
+  .big-quote { text-align: center; max-width: 900px; }
+  .big-quote h1 {
+    font-size: clamp(2rem, 4.5vw, 3.2rem); font-weight: 600; line-height: 1.25;
+    color: var(--text-0);
+  }
+  .big-quote .g { color: var(--green); }
+  .big-quote .dim { color: var(--text-2); }
+
+  /* ── Two levers ─────────────────────────────────── */
+  .levers-header { max-width: 1200px; width: 100%; margin-bottom: 24px; }
+  .levers-header h1 { font-size: clamp(1.8rem, 4vw, 2.8rem); font-weight: 800; line-height: 1.1; }
+  .levers-header .accent { color: var(--green); }
+  .levers-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 2px;
+    max-width: 1200px; width: 100%;
+    border: 1px solid var(--border); border-radius: var(--r-lg); overflow: hidden;
+  }
+  .lever-col { background: var(--bg-1); padding: 30px 32px; }
+  .lever-col .lever-icon {
+    width: 36px; height: 36px; border: 1px solid var(--border);
+    border-radius: 6px; display: grid; place-items: center;
+    font-family: Consolas, 'Courier New', Courier, monospace; font-size: .8rem; color: var(--text-1);
+    margin-bottom: 16px;
+  }
+  .lever-col h3 { color: var(--text-0); font-size: 1.25rem; font-weight: 700; margin-bottom: 20px; }
+  .lever-item { margin-bottom: 16px; }
+  .lever-item .label { color: var(--text-0); font-weight: 600; font-size: .92rem; }
+  .lever-item .desc { color: var(--text-2); font-size: .85rem; }
+  .lever-item .underline { text-decoration: underline; }
+  @media (max-width: 900px) { .levers-grid { grid-template-columns: 1fr; } }
+
+  /* ── Guide the agent ────────────────────────────── */
+  .guide-header { max-width: 1200px; width: 100%; margin-bottom: 20px; }
+  .guide-header .eyebrow {
+    text-transform: uppercase; letter-spacing: 2px; font-size: .75rem;
+    color: var(--green); font-weight: 600; margin-bottom: 8px;
+  }
+  .guide-header h1 { font-size: clamp(1.8rem, 4vw, 2.8rem); font-weight: 800; color: var(--text-0); }
+  .guide-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px;
+    max-width: 1200px; width: 100%;
+    border: 1px solid var(--green); border-radius: var(--r-lg); overflow: hidden;
+    margin-bottom: 28px;
+  }
+  .guide-cell { background: var(--bg-1); padding: 28px 26px; }
+  .guide-cell .check {
+    width: 32px; height: 32px; border-radius: 50%;
+    border: 2px solid var(--green); color: var(--green);
+    display: grid; place-items: center; margin-bottom: 20px;
+  }
+  .guide-cell h3 { color: var(--text-0); font-size: 1.15rem; font-weight: 700; margin-bottom: 8px; }
+  .guide-cell p { color: var(--text-2); font-size: .88rem; }
+  .guide-bar {
+    display: flex; gap: 2px; max-width: 1200px; width: 100%;
+  }
+  .guide-bar-item {
+    padding: 12px 16px; font-size: .7rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 1px; text-align: center;
+  }
+  .guide-bar-label { color: var(--text-2); font-size: .65rem; margin-bottom: 4px; }
+  @media (max-width: 900px) { .guide-grid { grid-template-columns: 1fr; } }
+
+  /* ── Research → Plan → Implement ────────────────── */
+  .rpi-layout { max-width: 1200px; width: 100%; }
+  .rpi-layout .eyebrow {
+    text-transform: uppercase; letter-spacing: 2px; font-size: .75rem;
+    color: var(--text-3); font-weight: 600; margin-bottom: 8px;
+  }
+  .rpi-layout h1 {
+    font-size: clamp(2rem, 4.5vw, 3.2rem); font-weight: 800; color: var(--text-0);
+    margin-bottom: 36px;
+  }
+  .rpi-prompt {
+    background: var(--bg-2); border: 1px solid var(--border);
+    border-radius: var(--r-md); padding: 14px 20px; margin-bottom: 28px;
+    font-family: Consolas, 'Courier New', Courier, monospace; font-size: .82rem;
+    color: var(--text-2); max-width: 380px;
+  }
+  .rpi-row { display: flex; align-items: center; gap: 16px; margin-bottom: 28px; }
+  .rpi-label { min-width: 110px; flex-shrink: 0; }
+  .rpi-label .cmd {
+    font-family: Consolas, 'Courier New', Courier, monospace; font-size: 1rem;
+    font-weight: 700; color: var(--text-0);
+  }
+  .rpi-label .model {
+    font-size: .75rem; color: var(--text-3); font-family: Consolas, 'Courier New', Courier, monospace;
+  }
+  .rpi-blocks { display: flex; gap: 2px; flex: 1; align-items: stretch; }
+  .rpi-block {
+    padding: 10px 14px; font-size: .7rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: .5px; text-align: center;
+    display: grid; place-items: center; min-height: 48px;
+    border-radius: 4px;
+  }
+  .rpi-block.sys { background: var(--green); color: var(--bg-0); }
+  .rpi-block.prompt { background: var(--violet); color: #fff; }
+  .rpi-block.file { background: var(--gold); color: var(--bg-0); min-width: 50px; }
+  .rpi-block.file.ok { border: 2px solid var(--green); }
+  .rpi-block.file.bad { border: 2px solid var(--red); }
+  .rpi-block.plan { background: var(--cyan); color: var(--bg-0); }
+  .rpi-block.reason { background: var(--text-3); color: var(--bg-0); }
+  .rpi-block.spec { background: var(--cyan); color: var(--bg-0); }
+  .rpi-block.change { background: #196B24; color: #fff; flex: 1; }
+  .rpi-bar { background: linear-gradient(90deg, var(--green), transparent); height: 4px; flex: 1; border-radius: 2px; }
+  .rpi-conn { width: 2px; height: 20px; background: var(--cyan); margin-left: 180px; }
+
+  /* ── Agent configs ──────────────────────────────── */
+  .configs-layout { max-width: 900px; width: 100%; }
+  .configs-layout h1 {
+    font-size: clamp(1.8rem, 4vw, 2.8rem); font-weight: 800; color: var(--text-0);
+    margin-bottom: 28px;
+  }
+  .config-list {
+    display: flex; flex-direction: column; gap: 0;
+    border: 1px solid var(--green); border-radius: var(--r-lg); overflow: hidden;
+    border-top: 3px solid var(--green);
+  }
+  .config-row {
+    display: flex; align-items: center; gap: 16px;
+    padding: 18px 24px; border-bottom: 1px solid var(--border);
+    background: var(--bg-1);
+  }
+  .config-row:last-child { border-bottom: none; }
+  .config-row .check {
+    width: 26px; height: 26px; border-radius: 50%;
+    border: 2px solid var(--green); color: var(--green);
+    display: grid; place-items: center; flex-shrink: 0;
+  }
+  .config-row .name { color: var(--text-0); font-size: 1.1rem; font-weight: 600; }
+  .config-row .path {
+    font-family: Consolas, 'Courier New', Courier, monospace; font-size: .78rem;
+    color: var(--text-3); margin-left: 8px;
+  }
+
+  /* ── Power users ────────────────────────────────── */
+  .power-layout {
+    display: grid; grid-template-columns: .6fr 1fr; gap: 32px;
+    max-width: 1200px; width: 100%; align-items: start;
+  }
+  .power-left .eyebrow {
+    text-transform: uppercase; letter-spacing: 2px; font-size: .7rem;
+    color: var(--text-3); margin-bottom: 12px;
+  }
+  .power-left h1 {
+    font-size: clamp(1.8rem, 4vw, 2.8rem); font-weight: 800; color: var(--text-0);
+    margin-bottom: 24px;
+  }
+  .power-left .caveat { color: var(--text-2); font-size: .88rem; line-height: 1.55; }
+  .power-left .caveat b { color: var(--green-soft); font-weight: 600; }
+  .power-tips { display: flex; flex-direction: column; gap: 0; }
+  .power-tip { padding: 20px 24px; border-bottom: 1px solid var(--border); }
+  .power-tip:last-child { border-bottom: none; }
+  .power-tip h3 { color: var(--text-0); font-size: 1.05rem; font-weight: 700; margin-bottom: 6px; }
+  .power-tip p { color: var(--text-2); font-size: .85rem; line-height: 1.5; }
+  .power-tip a { color: var(--cyan); text-decoration: none; }
+  .power-tip a:hover { text-decoration: underline; }
+  @media (max-width: 900px) { .power-layout { grid-template-columns: 1fr; } }
+
+  /* ── 5 things today ─────────────────────────────── */
+  .today-layout {
+    display: grid; grid-template-columns: .55fr 1fr; gap: 40px;
+    max-width: 1100px; width: 100%; align-items: center;
+  }
+  .today-left .eyebrow {
+    text-transform: uppercase; letter-spacing: 2px; font-size: .7rem;
+    color: var(--green); font-weight: 600; margin-bottom: 12px;
+  }
+  .today-left h1 {
+    font-size: clamp(2rem, 4.5vw, 3.2rem); font-weight: 800; color: var(--text-0);
+    line-height: 1.1;
+  }
+  .today-list { display: flex; flex-direction: column; gap: 20px; }
+  .today-item { display: flex; align-items: flex-start; gap: 18px; }
+  .today-item .check {
+    width: 32px; height: 32px; border-radius: 50%;
+    border: 2px solid var(--green); color: var(--green);
+    display: grid; place-items: center; flex-shrink: 0; margin-top: 2px;
+  }
+  .today-item p { color: var(--text-1); font-size: 1.05rem; line-height: 1.5; }
+  @media (max-width: 900px) { .today-layout { grid-template-columns: 1fr; } }
+
+  /* ── Gambling layout ────────────────────────────── */
+  .gambling-layout {
+    display: flex; flex-direction: column; justify-content: center;
+    max-width: 800px; width: 100%;
+  }
+  .gambling-layout h1 {
+    font-size: clamp(2.2rem, 5vw, 3.6rem); font-weight: 800; line-height: 1.1;
+    margin-bottom: 60px;
+  }
+  .gambling-layout h1 .accent { color: var(--green); }
+  .gambling-layout .sub {
+    color: var(--text-2); font-size: 1.1rem; line-height: 1.6; max-width: 600px;
+  }
+
+  /* ── Two-col content layout ─────────────────────── */
+  .two-col {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 24px;
+    max-width: 1100px; width: 100%;
+  }
+  @media (max-width: 900px) { .two-col { grid-template-columns: 1fr; } }
+
+  .content-card {
+    border: 1px solid var(--border); border-radius: var(--r-lg);
+    background: var(--bg-1); padding: 28px 26px;
+  }
+  .content-card h3 { color: var(--text-0); font-size: 1.15rem; font-weight: 700; margin-bottom: 14px; }
+  .content-card p { color: var(--text-2); font-size: .92rem; line-height: 1.55; margin-bottom: 12px; }
+  .content-card ul { padding-left: 18px; margin: 0; }
+  .content-card li { color: var(--text-2); font-size: .88rem; line-height: 1.6; margin-bottom: 6px; }
+
+  /* ── Section header ─────────────────────────────── */
+  .section-header {
+    max-width: 800px; width: 100%;
+  }
+  .section-header h1 {
+    font-size: clamp(2rem, 4.5vw, 3.2rem); font-weight: 800; color: var(--text-0);
+    line-height: 1.1; margin-bottom: 20px;
+  }
+  .section-header p {
+    color: var(--text-2); font-size: 1.1rem; line-height: 1.6; max-width: 600px;
+  }
+
+  /* ── Checklist ──────────────────────────────────── */
+  .checklist {
+    display: flex; flex-direction: column; gap: 0;
+    max-width: 800px; width: 100%;
+    border: 1px solid var(--border); border-radius: var(--r-lg); overflow: hidden;
+  }
+  .checklist-item {
+    display: flex; align-items: flex-start; gap: 16px;
+    padding: 20px 24px; border-bottom: 1px solid var(--border);
+    background: var(--bg-1);
+  }
+  .checklist-item:last-child { border-bottom: none; }
+  .checklist-item .icon {
+    width: 28px; height: 28px; border-radius: 50%;
+    display: grid; place-items: center; flex-shrink: 0;
+    font-size: .8rem;
+  }
+  .checklist-item .icon.warn { background: rgba(233,113,50,.15); color: var(--orange); border: 1px solid rgba(233,113,50,.3); }
+  .checklist-item .icon.safe { background: rgba(63,185,80,.15); color: var(--green); border: 1px solid rgba(63,185,80,.3); }
+  .checklist-item .icon.danger { background: rgba(248,81,73,.15); color: var(--red); border: 1px solid rgba(248,81,73,.3); }
+  .checklist-item h4 { color: var(--text-0); font-size: 1rem; font-weight: 600; margin-bottom: 4px; }
+  .checklist-item p { color: var(--text-2); font-size: .85rem; line-height: 1.5; }
+
+  /* ── Three card grid ────────────────────────────── */
+  .three-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 18px; max-width: 1200px; width: 100%;
+  }
+  @media (max-width: 900px) { .three-grid { grid-template-columns: 1fr; } }
+
+  /* ── Flow steps ─────────────────────────────────── */
+  .flow-steps {
+    display: flex; align-items: center; gap: 0;
+    max-width: 1100px; width: 100%;
+  }
+  .flow-step {
+    flex: 1; border: 1px solid var(--border); border-radius: var(--r-lg);
+    background: var(--bg-1); padding: 24px 20px; text-align: center;
+    position: relative;
+  }
+  .flow-step h3 { color: var(--text-0); font-size: 1.05rem; font-weight: 700; margin-bottom: 8px; }
+  .flow-step p { color: var(--text-2); font-size: .82rem; line-height: 1.5; }
+  .flow-step .step-badge {
+    position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
+    width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center;
+    font-weight: 800; font-size: .7rem; color: #fff;
+  }
+  .flow-arrow {
+    width: 40px; flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+    color: var(--text-3);
+  }
+  .flow-arrow svg { width: 20px; height: 20px; }
+
+  .key-hint {
+    position: fixed; bottom: 32px; left: 28px;
+    font-size: .6rem; color: var(--text-3); opacity: .35; z-index: 50;
+  }
+  kbd {
+    display: inline-block; padding: 2px 5px;
+    border: 1px solid var(--border); border-radius: 4px;
+    font-family: Consolas, 'Courier New', Courier, monospace; font-size: .52rem;
+    background: var(--bg-2); margin: 0 2px;
+  }
+</style>
+</head>
+<body>
+
+<!-- ── Top nav ──────────────────────────────────── -->
+<nav class="topnav">
+  <a class="brand" href="javascript:void(0)" onclick="if(typeof goToSlide==='function')goToSlide(0);" style="text-decoration:none;cursor:pointer;">
+    <svg viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+    <span>Copilot Best Practices &amp; Strategy</span>
+    <div class="dot"></div>
+  </a>
+</nav>
+
+<!-- ── Progress ─────────────────────────────────── -->
+<div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+
+<!-- ── Side rail ────────────────────────────────── -->
+<div class="rail" id="rail"></div>
+
+<!-- ── Slides ───────────────────────────────────── -->
+<div class="slides-viewport">
+
+  <!-- ════ SLIDE 0: Agenda ════ -->
+  <div class="slide active" data-slide="0">
+    <div class="page-tag"><span class="dot"></span> Agenda</div>
+    <h1 class="headline" style="font-size:clamp(1.6rem,3vw,2.4rem); margin-bottom:28px;">GitHub Copilot Best Practices &amp; Strategy</h1>
+
+    <div class="agenda-list">
+      <div class="agenda-item" data-goto="1">
+        <div class="agenda-num">01</div>
+        <div class="agenda-text">
+          <div class="title">Safe Usage in Legacy &amp; Brownfield Repos</div>
+          <div class="desc">Spec definitions, context introspection, safe collaboration patterns</div>
+        </div>
+        <div class="arrow">→</div>
+      </div>
+      <div class="agenda-item" data-goto="5">
+        <div class="agenda-num">02</div>
+        <div class="agenda-text">
+          <div class="title">Baseline Guardrails &amp; Governance</div>
+          <div class="desc">Prompt safety, tool usage controls, AI governance demo</div>
+        </div>
+        <div class="arrow">→</div>
+      </div>
+      <div class="agenda-item" data-goto="9">
+        <div class="agenda-num">03</div>
+        <div class="agenda-text">
+          <div class="title">Prompting &amp; Context-Setting Patterns</div>
+          <div class="desc">Context engineering, token optimization, agent configuration</div>
+        </div>
+        <div class="arrow">→</div>
+      </div>
+      <div class="agenda-item" data-goto="18">
+        <div class="agenda-num">04</div>
+        <div class="agenda-text">
+          <div class="title">Testing, Code Quality &amp; Validation</div>
+          <div class="desc">Unit tests, validation agents, quality automation workflows</div>
+        </div>
+        <div class="arrow">→</div>
+      </div>
+      <div class="agenda-item" data-goto="22">
+        <div class="agenda-num">05</div>
+        <div class="agenda-text">
+          <div class="title">GitHub Actions &amp; CI/CD Acceleration</div>
+          <div class="desc">Reusable workflows, YAML generation, pipeline onboarding</div>
+        </div>
+        <div class="arrow">→</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════
+       SECTION 1: Safe Usage in Legacy & Brownfield Repos
+       ══════════════════════════════════════════════════ -->
+
+  <!-- ════ SLIDE 1: Section Intro ════ -->
+  <div class="slide" data-slide="1">
+    <div class="page-num"></div>
+    <div class="page-tag"><span class="dot" style="background:var(--cyan);box-shadow:0 0 8px var(--cyan);"></span> Legacy &amp; Brownfield</div>
+
+    <div class="section-header">
+      <h1>Safe Usage of Copilot in <span style="color:var(--cyan);">Legacy &amp; Brownfield</span> Repositories</h1>
+      <p>Strategies for introducing AI-assisted development into existing codebases without introducing risk or technical debt.</p>
+    </div>
+  </div>
+
+  <!-- ════ SLIDE 2: Spec Definitions ════ -->
+  <div class="slide" data-slide="2">
+    <div class="page-num"></div>
+    <div class="page-tag"><span class="dot" style="background:var(--cyan);box-shadow:0 0 8px var(--cyan);"></span> Legacy &amp; Brownfield</div>
+    <h1 class="headline" style="font-size:clamp(1.4rem,2.8vw,2.2rem); margin-bottom:24px;">Create Spec Definitions &amp; Design Documentation</h1>
+
+    <div class="two-col">
+      <div class="content-card">
+        <h3 style="color:var(--cyan-soft);">Why Specs Matter</h3>
+        <p>Before Copilot can effectively contribute to an existing codebase, it needs to understand the system's design intent — not just its current implementation.</p>
+        <ul>
+          <li>Defines the <b style="color:var(--text-0);">boundary of acceptable changes</b></li>
+          <li>Prevents Copilot from suggesting patterns that conflict with existing architecture</li>
+          <li>Creates a shared understanding between human and AI reviewers</li>
+          <li>Enables deterministic validation of AI-generated code against documented contracts</li>
+        </ul>
+      </div>
+      <div class="content-card">
+        <h3 style="color:var(--green-soft);">What to Document</h3>
+        <ul>
+          <li><b style="color:var(--text-0);">API contracts</b> — input/output schemas, error handling patterns</li>
+          <li><b style="color:var(--text-0);">Data flow diagrams</b> — how information moves through the system</li>
+          <li><b style="color:var(--text-0);">Invariants</b> — conditions that must always be true</li>
+          <li><b style="color:var(--text-0);">Module boundaries</b> — what each component owns and doesn't own</li>
+          <li><b style="color:var(--text-0);">Legacy constraints</b> — why certain patterns exist (even if suboptimal)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ SLIDE 3: Context Through Introspection ════ -->
+  <div class="slide" data-slide="3">
+    <div class="page-num"></div>
+    <div class="page-tag"><span class="dot" style="background:var(--cyan);box-shadow:0 0 8px var(--cyan);"></span> Legacy &amp; Brownfield</div>
+    <h1 class="headline" style="font-size:clamp(1.4rem,2.8vw,2.2rem); margin-bottom:24px;">Building Context Through Codebase Introspection</h1>
+
+    <div class="flow-steps" style="margin-bottom:32px;">
+      <div class="flow-step" style="position:relative;">
+        <div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:.7rem;color:#fff;background:var(--cyan);">1</div>
+        <h3>Discover</h3>
+        <p>Use Copilot to map existing patterns, dependencies, and conventions</p>
+      </div>
+      <div class="flow-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></div>
+      <div class="flow-step" style="position:relative;">
+        <div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:.7rem;color:#fff;background:var(--green);">2</div>
+        <h3>Document</h3>
+        <p>Generate architecture docs, dependency graphs, and pattern catalogs</p>
+      </div>
+      <div class="flow-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></div>
+      <div class="flow-step" style="position:relative;">
+        <div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:.7rem;color:#fff;background:var(--purple);">3</div>
+        <h3>Encode</h3>
+        <p>Embed findings into copilot-instructions.md, custom agents and other agentic primitives</p>
+      </div>
+      <div class="flow-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></div>
+      <div class="flow-step" style="position:relative;">
+        <div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:.7rem;color:#fff;background:var(--gold);">4</div>
+        <h3>Validate</h3>
+        <p>Verify AI outputs align with discovered patterns and documented specs</p>
+      </div>
+    </div>
+
+    <div class="content-card" style="max-width:1100px;">
+      <h3 style="color:var(--purple);">Practical Techniques</h3>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+        <div>
+          <p><b style="color:var(--text-0);">Ask Copilot to analyze</b> — "Describe the patterns used in this module and list all external dependencies"</p>
+          <p><b style="color:var(--text-0);">Generate dependency maps</b> — Use /research to scan the codebase before making changes</p>
+        </div>
+        <div>
+          <p><b style="color:var(--text-0);">Create pattern catalogs</b> — Document recurring patterns so Copilot follows them consistently</p>
+          <p><b style="color:var(--text-0);">Establish naming conventions</b> — Explicit rules in instructions files prevent style drift</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="content-card" style="max-width:1100px;margin-top:18px;border-left:3px solid var(--gold);">
+      <h3 style="color:var(--gold);">Impact</h3>
+      <p>This is one of the most impactful practices that an organization can do or not do. It drastically improves agent efficacy while drastically decreasing cost.</p>
+    </div>
+  </div>
+
+  <!-- ════ SLIDE 4: Safe Collaboration Patterns ════ -->
+  <div class="slide" data-slide="4">
+    <div class="page-num"></div>
+    <div class="page-tag"><span class="dot" style="background:var(--cyan);box-shadow:0 0 8px var(--cyan);"></span> Legacy &amp; Brownfield</div>
+    <h1 class="headline" style="font-size:clamp(1.4rem,2.8vw,2.2rem); margin-bottom:24px;">Safe Collaboration Patterns for Legacy Code</h1>
+
+    <div class="three-grid">
+      <div class="content-card" style="border-top:3px solid var(--cyan);">
+        <h3 style="color:var(--cyan-soft);">Incremental Adoption</h3>
+        <ul>
+          <li>Start with read-only tasks: documentation, analysis, test generation</li>
+          <li>Gradually expand to refactoring with human review gates</li>
+          <li>Establish rollback strategies before making changes</li>
+          <li>Use feature flags for AI-generated code paths</li>
+        </ul>
+      </div>
+      <div class="content-card" style="border-top:3px solid var(--green);">
+        <h3 style="color:var(--green-soft);">Guardrail Patterns</h3>
+        <ul>
+          <li>Define "no-touch" zones in instructions files</li>
+          <li>Require test coverage before AI modifications</li>
+          <li>Use scoped instructions for sensitive modules</li>
+          <li>Enforce code review for all AI-generated changes</li>
+        </ul>
+      </div>
+      <div class="content-card" style="border-top:3px solid var(--purple);">
+        <h3 style="color:var(--purple);">Risk Mitigation</h3>
+        <ul>
+          <li>Never let AI modify security-critical code without explicit review</li>
+          <li>Keep session context focused — don't mix concerns</li>
+          <li>Validate AI suggestions against existing test suites</li>
+          <li>Document AI decisions for audit trails</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════
+       SECTION 2: Baseline Guardrails & Governance
+       ══════════════════════════════════════════════════ -->
+
+  <!-- ════ SLIDE 5: Section Intro ════ -->
+  <div class="slide" data-slide="5">
+    <div class="page-num"></div>
+    <div class="page-tag"><span class="dot" style="background:var(--green);box-shadow:0 0 8px var(--green);"></span> Guardrails &amp; Governance</div>
+
+    <div class="section-header">
+      <h1>Baseline Guardrails &amp; <span style="color:var(--green);">Governance</span> Considerations</h1>
+      <p>Establishing organizational controls and safety practices for responsible AI-assisted development across teams.</p>
+    </div>
+  </div>
+
+  <!-- ════ SLIDE 6: Prompt Safety ════ -->
+  <div class="slide" data-slide="6">
+    <div class="page-num"></div>
+    <div class="page-tag"><span class="dot" style="background:var(--green);box-shadow:0 0 8px var(--green);"></span> Guardrails &amp; Governance</div>
+    <h1 class="headline" style="font-size:clamp(1.4rem,2.8vw,2.2rem); margin-bottom:24px;">Prompt Safety</h1>
+
+    <div class="checklist" style="margin-bottom:24px;">
+      <div class="checklist-item">
+        <div class="icon danger">✗</div>
+        <div>
+          <h4>Never include personal or private information</h4>
+          <p>Do not paste credentials, API keys, tokens, passwords, PII (names, emails, SSNs), or internal IP addresses into prompts. The model does not need this data to help you code.</p>
+        </div>
+      </div>
+      <div class="checklist-item">
+        <div class="icon danger">✗</div>
+        <div>
+          <h4>Avoid proprietary business data</h4>
+          <p>Customer data, financial figures, internal metrics, and trade secrets should never appear in prompts. Use synthetic or anonymized data for examples.</p>
+        </div>
+      </div>
+      <div class="checklist-item">
+        <div class="icon warn">!</div>
+        <div>
+          <h4>Be cautious with internal URLs and paths</h4>
+          <p>Internal system URLs, file paths with usernames, or infrastructure details can reveal attack surface. Generalize when possible.</p>
+        </div>
+      </div>
+      <div class="checklist-item">
+        <div class="icon safe">✓</div>
+        <div>
+          <h4>Use context files instead of pasting secrets</h4>
+          <p>Reference .env files, secrets managers, or environment variables by name — never paste their values. Use patterns like <code style="color:var(--cyan);font-family:Consolas,monospace;font-size:.85rem;">process.env.DATABASE_URL</code></p>
+        </div>
+      </div>
+      <div class="checklist-item">
+        <div class="icon safe">✓</div>
+        <div>
+          <h4>Leverage content exclusions</h4>
+          <p>Configure content exclusion policies at the organization level to prevent Copilot from accessing sensitive files or directories entirely.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ SLIDE 7: Tool Usage Safety ════ -->
+  <div class="slide" data-slide="7">
+    <div class="page-num"></div>
+    <div class="page-tag"><span class="dot" style="background:var(--green);box-shadow:0 0 8px var(--green);"></span> Guardrails &amp; Governance</div>
+    <h1 class="headline" style="font-size:clamp(1.4rem,2.8vw,2.2rem); margin-bottom:24px;">Tool Usage Safety</h1>
+
+    <div class="two-col">
+      <div class="content-card" style="border-top:3px solid var(--green);">
+        <h3 style="color:var(--green-soft);">Only Trusted Tools</h3>
+        <ul>
+          <li><b style="color:var(--text-0);">Vet MCP servers</b> — Only connect to organization-approved Model Context Protocol servers</li>
+          <li><b style="color:var(--text-0);">Review tool permissions</b> — Understand what each tool can read, write, or execute</li>
+          <li><b style="color:var(--text-0);">Audit tool outputs</b> — Tools that execute code or modify files require extra scrutiny</li>
+          <li><b style="color:var(--text-0);">Pin tool versions</b> — Avoid auto-updating tools that could introduce unexpected capabilities</li>
+        </ul>
+      </div>
+      <div class="content-card" style="border-top:3px solid var(--orange);">
+        <h3 style="color:var(--orange);">Common Risks</h3>
+        <ul>
+          <li><b style="color:var(--text-0);">Untrusted shell execution</b> — AI may suggest running commands that have side effects</li>
+          <li><b style="color:var(--text-0);">Data exfiltration</b> — Tools with network access could send data to unexpected endpoints</li>
+          <li><b style="color:var(--text-0);">Privilege escalation</b> — Tools running with elevated permissions pose higher risk</li>
+          <li><b style="color:var(--text-0);">Supply chain attacks</b> — Third-party tools/extensions may contain vulnerabilities</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="content-card" style="max-width:1100px;margin-top:20px;border-left:3px solid var(--cyan);">
+      <p><b style="color:var(--text-0);">Best Practice:</b> Maintain an approved tools list at the org level. Configure agent permissions in <code style="color:var(--cyan);font-family:Consolas,monospace;font-size:.85rem;">copilot-instructions.md</code> to explicitly state which tools are authorized for your project.</p>
+    </div>
+  </div>
+
+  <!-- ════ SLIDE 8: AI Controls (copied from slide 24 / Cost Governance) ════ -->
+  <div class="slide" data-slide="8">
+    <div class="page-num"></div>
+    <div class="page-tag"><span class="dot" style="background:var(--green);box-shadow:0 0 8px var(--green);"></span> Guardrails &amp; Governance</div>
+    <h1 class="headline" style="font-size:clamp(1.4rem,2.8vw,2.2rem); margin-bottom:24px;">AI Governance Controls</h1>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;max-width:1100px;width:100%;">
+      <div style="border:1px solid var(--border);border-radius:var(--r-lg);background:var(--bg-1);padding:28px 26px;">
+        <h3 style="color:var(--text-0);font-size:1.15rem;font-weight:700;margin-bottom:14px;text-align:center;">AI Controls Demo</h3>
+        <div style="border:1px solid var(--border);border-radius:var(--r-md);overflow:hidden;">
+          <img src="assets/ModelSelection.png" alt="Model enforcement configuration" style="width:100%;height:auto;display:block;" />
+        </div>
+      </div>
+      <div style="border:1px solid var(--border);border-radius:var(--r-lg);background:var(--bg-1);padding:28px 26px;">
+        <h3 style="color:var(--text-0);font-size:1.15rem;font-weight:700;margin-bottom:14px;">Things to do today</h3>
+        <p style="color:var(--text-2);font-size:.92rem;line-height:1.55;margin-bottom:18px;">Practical steps for managing token costs and enforcing governance across your teams.</p>
+        <a href="https://share.articulate.com/pmpueguUReJvPTq-7f_aY#/lessons/K35jvv4-mvv8UjVfOenLrpg845UA413F" target="_blank" rel="noopener"
+           style="display:inline-flex;align-items:center;gap:8px;padding:10px 22px;background:linear-gradient(135deg,var(--cyan),var(--violet));color:#fff;font-weight:600;font-size:.9rem;border-radius:999px;text-decoration:none;">
+          Cost governance guide ↗
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════
+       SECTION 3: Prompting & Context-Setting Patterns
+       ══════════════════════════════════════════════════ -->
+
+  <!-- ════ SLIDE 9: Copied from Slide 7 (Prompts vs Context Engineering) ════ -->
+  <div class="slide" data-slide="9">
+    <div class="page-num"></div>
+    <div class="page-tag"><span class="dot" style="background:var(--purple);box-shadow:0 0 8px var(--purple);"></span> Prompting &amp; Context</div>
+    <h1 class="headline" style="font-size:clamp(1.4rem,2.8vw,2.2rem); margin-bottom:24px;">Prompts of the past vs context engineering</h1>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:24px; max-width:1100px; width:100%;">
+      <div style="border:1px solid var(--border); border-radius:var(--r-lg); background:var(--bg-1); padding:32px 30px; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center;">
+        <h3 style="color:var(--text-0); font-size:1.3rem; font-weight:700; margin-bottom:36px;">Prompts, early 2025</h3>
+        <p style="font-size:1.8rem; font-weight:700; color:var(--text-0); line-height:1.3; margin-bottom:28px;">"Find and fix the bug, NOW!"</p>
+        <p style="color:var(--text-3); font-size:.88rem; font-style:italic;">(after 3 chat turns that broke production)</p>
+      </div>
+      <div style="border:1px solid var(--border); border-radius:var(--r-lg); background:var(--bg-1); padding:28px 26px;">
+        <h3 style="color:var(--text-0); font-size:1.3rem; font-weight:700; margin-bottom:20px; text-align:center;">Prompts, late 2025</h3>
+        <div style="background:var(--bg-2); border:1px solid var(--border-soft); border-radius:var(--r-md); padding:18px 20px; font-family:Consolas,'Courier New',Courier,monospace; font-size:.78rem; line-height:1.65; color:var(--text-1);">
+          <span style="color:var(--green);">&lt;!-- File debug-az.prompt.md --&gt;</span><br/>
+          You are an expert debugger, specialized in debugging complex programming issues.<br/><br/>
+          You are particularly great at debugging this project, which architecture and quirks can be consulted in the <span style="color:var(--cyan);">[architecture document](./docs/architecture.md)</span>.<br/><br/>
+          Follow these steps:<br/><br/>
+          1. Review the <span style="color:var(--cyan);">[error logs](./logs/error.log)</span> and identify the root cause.<br/><br/>
+          2. Use the <span style="color:var(--cyan);">`azmcp-monitor-log-query`</span> MCP tool to retrieve infrastructure logs from Azure.<br/><br/>
+          3. Once you find the root cause, think about 3 potential solutions with trade-offs<br/><br/>
+          4. Present your root cause analysis and suggested solutions with trade-offs to the user and seek validation before proceeding with fixes – do not change any files.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ SLIDE 11: Agent gambling (copied from slide 16) ════ -->
+  <div class="slide" data-slide="10">
+    <div class="page-num"></div>
+    <div class="page-tag"><span class="dot" style="background:var(--gold);box-shadow:0 0 8px var(--gold);"></span> Token Optimization</div>
+
+    <div class="gambling-layout">
+      <h1><span class="accent">Agent gambling</span><br/>is no longer<br/>sustainable</h1>
+      <p class="sub">When tokens are cheap, agent accuracy is not important. Once they are not, they require engineering work.</p>
+    </div>
+  </div>
+
+  <!-- ════ SLIDE 12: Context Rule (copied from slide 17) ════ -->
+  <div class="slide" data-slide="11">
+    <div class="page-num"></div>
+    <div class="page-tag"><span class="dot" style="background:var(--gold);box-shadow:0 0 8px var(--gold);"></span> Token Optimization</div>
+
+    <div class="big-quote">
+      <h1><span class="g">Provide</span> as little<br/>context as possible, <span class="dim">but</span><br/><span class="g">as much as required.</span></h1>
+    </div>
+  </div>
+
+  <!-- ════ SLIDE 13: Two Levers (copied from slide 18) ════ -->
+  <div class="slide" data-slide="12">
+    <div class="page-num"></div>
+    <div class="page-tag"><span class="dot" style="background:var(--gold);box-shadow:0 0 8px var(--gold);"></span> Token Optimization</div>
+
+    <div class="levers-header">
+      <h1>The two biggest levers for<br/><span class="accent">optimizing quality &amp; tokens</span></h1>
+    </div>
+
+    <div class="levers-grid">
+      <div class="lever-col">
+        <div class="lever-icon">&gt;_</div>
+        <h3>Model choice &amp; auto mode</h3>
+        <div class="lever-item">
+          <div class="label">Reasoning models (Opus, GPT-5.5)</div>
+          <div class="desc">for sync tasks like planning, architecture, debugging.</div>
+        </div>
+        <div class="lever-item">
+          <div class="label">Mid-tier models (Sonnet, GPT5.4)</div>
+          <div class="desc">for async implementation.</div>
+        </div>
+        <div class="lever-item">
+          <div class="label">Low-tier (Haiku, GPT-mini)</div>
+          <div class="desc">for small refactorings, repetitive tasks, doc updates.</div>
+        </div>
+        <div class="lever-item">
+          <div class="label">Auto Mode</div>
+          <div class="desc">as the lazy default.</div>
+        </div>
+      </div>
+      <div class="lever-col">
+        <div class="lever-icon">&gt;_</div>
+        <h3>Provide only relevant context</h3>
+        <div class="lever-item">
+          <div class="desc">As <b style="color:var(--text-0);">much as required</b>, as little as necessary.</div>
+        </div>
+        <div class="lever-item">
+          <div class="desc">Context Engineering as your <b style="color:var(--text-0);">guidance and upskill potential</b>.</div>
+        </div>
+        <div class="lever-item">
+          <div class="desc">Compacting sessions can be helpful – but they can also lead to valuable information being lost. <span class="underline">Used it cautiously.</span></div>
+        </div>
+        <div class="lever-item">
+          <div class="desc">Use <b style="color:var(--text-0);">/clear often</b>, for each new task.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ SLIDE 14: Guide the Agent (copied from slide 19) ════ -->
+  <div class="slide" data-slide="13">
+    <div class="page-num"></div>
+    <div class="page-tag"><span class="dot" style="background:var(--gold);box-shadow:0 0 8px var(--gold);"></span> Token Optimization</div>
+
+    <div class="guide-header">
+      <div class="eyebrow">Guiding the agent</div>
+      <h1>Your Prompt</h1>
+    </div>
+
+    <div class="guide-grid">
+      <div class="guide-cell">
+        <div class="check">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <h3>Be precise.</h3>
+        <p>Add description.</p>
+      </div>
+      <div class="guide-cell">
+        <div class="check">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <h3>Add stop signals.</h3>
+        <p>"Stop if X."</p>
+      </div>
+      <div class="guide-cell">
+        <div class="check">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <h3>Add known context beforehand.</h3>
+        <p>Files, Folders, Websites, etc.</p>
+      </div>
+    </div>
+
+    <div class="guide-bar">
+      <div style="display:flex;gap:2px;">
+        <div class="guide-bar-item" style="background:var(--bg-2);border-radius:6px 0 0 6px;border:1px solid var(--border);">
+          <div class="guide-bar-label">Always on</div>
+          <div style="color:var(--text-1);font-size:.7rem;">System &amp; Tools</div>
+        </div>
+        <div class="guide-bar-item" style="background:rgba(139,111,239,.2);border-radius:0 6px 6px 0;border:1px solid var(--violet);">
+          <div class="guide-bar-label">Always on</div>
+          <div style="color:var(--purple);font-size:.7rem;">Prompt</div>
+        </div>
+      </div>
+      <div style="flex:1;background:rgba(63,185,80,.08);border:1px solid rgba(63,185,80,.3);border-radius:6px;margin-left:8px;"></div>
+    </div>
+  </div>
+
+  <!-- ════ SLIDE 15: Research → Plan → Implement (copied from slide 20) ════ -->
+  <div class="slide" data-slide="14">
+    <div class="page-num"></div>
+    <div class="page-tag"><span class="dot" style="background:var(--gold);box-shadow:0 0 8px var(--gold);"></span> Token Optimization</div>
+
+    <div class="rpi-layout">
+      <div class="eyebrow">Divide and conquer your work</div>
+      <h1>Research → Plan → Implement</h1>
+
+      <div class="rpi-prompt">"I want to change X.<br/>What files are relevant?"</div>
+
+      <div class="rpi-row">
+        <div class="rpi-label">
+          <div class="cmd">/research</div>
+          <div class="model">Gemini 2.5 Pro</div>
+        </div>
+        <div class="rpi-blocks">
+          <div class="rpi-block sys">System<br/>Prompt</div>
+          <div class="rpi-block prompt">Prompt</div>
+          <div class="rpi-block file bad">File</div>
+          <div class="rpi-block file bad">File</div>
+          <div class="rpi-block file ok">File</div>
+          <div class="rpi-block file bad">File</div>
+          <div class="rpi-block file bad">File</div>
+          <div class="rpi-block file ok">File</div>
+          <div class="rpi-block plan">Plan<br/>Input</div>
+          <div class="rpi-bar"></div>
+        </div>
+      </div>
+
+      <div class="rpi-conn"></div>
+
+      <div class="rpi-row">
+        <div class="rpi-label">
+          <div class="cmd">/plan</div>
+          <div class="model">Opus 4.6</div>
+        </div>
+        <div class="rpi-blocks">
+          <div class="rpi-block sys">System<br/>Prompt</div>
+          <div class="rpi-block prompt">Prompt</div>
+          <div class="rpi-block plan">Plan<br/>Input</div>
+          <div class="rpi-block file">File</div>
+          <div class="rpi-block file">File</div>
+          <div class="rpi-block reason">Reasoning</div>
+          <div class="rpi-block spec">Precise<br/>Spec</div>
+          <div class="rpi-bar"></div>
+        </div>
+      </div>
+
+      <div class="rpi-conn"></div>
+
+      <div class="rpi-row">
+        <div class="rpi-label">
+          <div class="cmd">/implement</div>
+          <div class="model">GPT 5.4 mini</div>
+        </div>
+        <div class="rpi-blocks">
+          <div class="rpi-block sys">System<br/>Prompt</div>
+          <div class="rpi-block prompt">Prompt</div>
+          <div class="rpi-block spec">Precise<br/>Spec</div>
+          <div class="rpi-block file">File</div>
+          <div class="rpi-block file">File</div>
+          <div class="rpi-block change">Change Calls</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ SLIDE 16: Agent Configs (copied from slide 21) ════ -->
+  <div class="slide" data-slide="15">
+    <div class="page-num"></div>
+    <div class="page-tag"><span class="dot" style="background:var(--gold);box-shadow:0 0 8px var(--gold);"></span> Token Optimization</div>
+
+    <div class="configs-layout">
+      <h1>Agent Configs</h1>
+      <div class="config-list">
+        <div class="config-row">
+          <div class="check"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div class="name">Persistent instructions</div>
+          <div class="path">COPILOT-INSTRUCTIONS.MD</div>
+        </div>
+        <div class="config-row">
+          <div class="check"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div class="name">Custom Agents.</div>
+          <div class="path">./GITHUB/AGENTS/*.AGENT.MD</div>
+        </div>
+        <div class="config-row">
+          <div class="check"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div class="name">Skills</div>
+          <div class="path">./GITHUB/SKILLS/*/SKILL.MD</div>
+        </div>
+        <div class="config-row">
+          <div class="check"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div class="name">MCP</div>
+          <div class="path"></div>
+        </div>
+        <div class="config-row">
+          <div class="check"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div class="name">Subagents</div>
+          <div class="path"></div>
+        </div>
+        <div class="config-row">
+          <div class="check"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div class="name">Scoped instructions.</div>
+          <div class="path">./GITHUB/INSTRUCTIONS/*.INSTRUCTIONS.MD</div>
+        </div>
+        <div class="config-row">
+          <div class="check"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div class="name">Prompt Files</div>
+          <div class="path">./.GITHUB/PROMPTS/*.PROMPT.MD</div>
+        </div>
+        <div class="config-row">
+          <div class="check"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div class="name">Copilot Memory</div>
+          <div class="path"></div>
+        </div>
+      </div>
+    </div>
+
+    <h2 style="font-size:1.4rem;font-weight:700;color:var(--text-0);margin-top:32px;margin-bottom:18px;">Agentic Primitives</h2>
+    <div class="prim-grid">
+      <div class="prim-card">
+        <h4>Copilot-Instructions.md</h4>
+        <ul style="color:var(--text-2);font-size:.85rem;line-height:1.6;padding-left:18px;margin:0;">
+          <li>Always included in every chat request.</li>
+          <li>For broad, workspace-wide coding standards.</li>
+          <li>Works across multiple editors (VS Code, Visual Studio, GitHub.com)</li>
+        </ul>
+      </div>
+      <div class="prim-card">
+        <h4>.instructions.md</h4>
+        <ul style="color:var(--text-2);font-size:.85rem;line-height:1.6;padding-left:18px;margin:0;">
+          <li>Task or context-specific instructions that can target specific files or patterns.</li>
+          <li>Auto/manual inclusion</li>
+          <li>Provides more granular, task-specific instructions</li>
+        </ul>
+      </div>
+      <div class="prim-card">
+        <h4>.prompt.md</h4>
+        <ul style="color:var(--text-2);font-size:.85rem;line-height:1.6;padding-left:18px;margin:0;">
+          <li>Used for fine tuning responses</li>
+          <li>Customizes how Copilot generates code in specific contexts.</li>
+          <li>Creates reusable prompts for common tasks</li>
+        </ul>
+      </div>
+      <div class="prim-card">
+        <h4>.agent.md</h4>
+        <ul style="color:var(--text-2);font-size:.85rem;line-height:1.6;padding-left:18px;margin:0;">
+          <li>Sets persona</li>
+          <li>Configure which tools the AI can access</li>
+          <li>Defines behaviour, sets tone and best practices</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ SLIDE 17: Power User Guidance (copied from slide 22) ════ -->
+  <div class="slide" data-slide="16">
+    <div class="page-num"></div>
+    <div class="page-tag"><span class="dot" style="background:var(--gold);box-shadow:0 0 8px var(--gold);"></span> Token Optimization</div>
+
+    <div class="power-layout">
+      <div class="power-left">
+        <div class="eyebrow">Metrics</div>
+        <h1>Power User Guidance</h1>
+        <p class="caveat">These Tips require good <b>knowledge and time-invest</b>, as they are conditional and / or come with trade-offs.</p>
+      </div>
+      <div class="power-tips">
+        <div class="power-tip">
+          <h3>Think in Code</h3>
+          <p>Prefer creating scripts to analyze files over feeding it to AI.</p>
+        </div>
+        <div class="power-tip">
+          <h3>Consider CLIs vs. MCPs</h3>
+          <p>CLI Tools can be more optimal in certain scenarios due to less static tokens.</p>
+        </div>
+        <div class="power-tip">
+          <h3>Improve Shell Outputs</h3>
+          <p>Shell outputs can be extremely long – use something like rtk to reduce their outputs.</p>
+        </div>
+        <div class="power-tip">
+          <h3>Run "/chronicle tip" regularly</h3>
+          <p>Analyze your usage in Copilot CLI to find improvement areas.</p>
+        </div>
+        <div class="power-tip">
+          <h3>Collapse Tool Calls</h3>
+          <p>Using something like copilot-codeact-plugin can help collapse multiple tool calls into one.</p>
+        </div>
+        <div class="power-tip">
+          <h3>Model Specific Context Optimization</h3>
+          <p>Models behave different and can be tweaked.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ SLIDE 18: 5 Things Today (copied from slide 23) ════ -->
+  <div class="slide" data-slide="17">
+    <div class="page-num"></div>
+    <div class="page-tag"><span class="dot" style="background:var(--gold);box-shadow:0 0 8px var(--gold);"></span> Token Optimization</div>
+
+    <div class="today-layout">
+      <div class="today-left">
+        <div class="eyebrow">Summary</div>
+        <h1>5 things you can start doing today</h1>
+      </div>
+      <div class="today-list">
+        <div class="today-item">
+          <div class="check"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <p>Chose the right model for the right task.</p>
+        </div>
+        <div class="today-item">
+          <div class="check"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <p>Provide clear guidance in your prompts.</p>
+        </div>
+        <div class="today-item">
+          <div class="check"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <p>Research – Plan – Implement.</p>
+        </div>
+        <div class="today-item">
+          <div class="check"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <p>Provide deterministic guardrails (tests, linters, security scans etc.).</p>
+        </div>
+        <div class="today-item">
+          <div class="check"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <p>Maintain a concise, human-written copilot-instructions.md. Use it as agent-miss log &amp; to trim outputs.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════
+       SECTION 4: Testing, Code Quality & Validation
+       ══════════════════════════════════════════════════ -->
+
+  <!-- ════ SLIDE 19: Section Intro ════ -->
+  <div class="slide" data-slide="18">
+    <div class="page-num"></div>
+    <div class="page-tag"><span class="dot" style="background:var(--gold);box-shadow:0 0 8px var(--gold);"></span> Testing &amp; Validation</div>
+
+    <div class="section-header">
+      <h1>Testing, Code Quality &amp; <span style="color:var(--gold);">Validation</span> Workflows</h1>
+      <p>How Copilot can support testing strategies, enforce quality standards, and provide continuous validation of AI-generated and human-written code.</p>
+    </div>
+  </div>
+
+  <!-- ════ SLIDE 20: Building Unit Tests ════ -->
+  <div class="slide" data-slide="19">
+    <div class="page-num"></div>
+    <div class="page-tag"><span class="dot" style="background:var(--gold);box-shadow:0 0 8px var(--gold);"></span> Testing &amp; Validation</div>
+    <h1 class="headline" style="font-size:clamp(1.4rem,2.8vw,2.2rem); margin-bottom:24px;">Building Unit Tests with Copilot</h1>
+
+    <div class="two-col">
+      <div class="content-card" style="border-top:3px solid var(--green);">
+        <h3 style="color:var(--green-soft);">Effective Test Generation</h3>
+        <ul>
+          <li><b style="color:var(--text-0);">Provide the implementation</b> — Attach the file under test and its interfaces for accurate mocking</li>
+          <li><b style="color:var(--text-0);">Specify testing framework</b> — "Use Jest with describe/it blocks" or "Use pytest with fixtures"</li>
+          <li><b style="color:var(--text-0);">Request edge cases</b> — "Include tests for null inputs, empty arrays, and boundary values"</li>
+          <li><b style="color:var(--text-0);">Test behavior, not implementation</b> — Guide Copilot toward testing outcomes rather than internal state</li>
+        </ul>
+      </div>
+      <div class="content-card" style="border-top:3px solid var(--purple);">
+        <h3 style="color:var(--purple);">Advanced Patterns</h3>
+        <ul>
+          <li><b style="color:var(--text-0);">Property-based testing</b> — Ask Copilot to generate QuickCheck / Hypothesis style tests</li>
+          <li><b style="color:var(--text-0);">Mutation testing prep</b> — Generate tests that catch common mutations (off-by-one, boundary, etc.)</li>
+          <li><b style="color:var(--text-0);">Integration scaffolding</b> — Use Copilot to create test harnesses and mock services</li>
+          <li><b style="color:var(--text-0);">Coverage gap analysis</b> — Ask Copilot to identify untested code paths</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="content-card" style="max-width:1100px;margin-top:20px;border-left:3px solid var(--cyan);">
+      <p style="margin-bottom:0;"><b style="color:var(--text-0);">Pro Tip:</b> Create a <code style="color:var(--cyan);font-family:Consolas,monospace;font-size:.85rem;">testing.instructions.md</code> that defines your test conventions, preferred assertion libraries, and naming patterns. This ensures consistent test output across your team.</p>
+    </div>
+  </div>
+
+  <!-- ════ SLIDE 21: Validation Agents ════ -->
+  <div class="slide" data-slide="20">
+    <div class="page-num"></div>
+    <div class="page-tag"><span class="dot" style="background:var(--gold);box-shadow:0 0 8px var(--gold);"></span> Testing &amp; Validation</div>
+    <h1 class="headline" style="font-size:clamp(1.4rem,2.8vw,2.2rem); margin-bottom:24px;">Validation Agents</h1>
+
+    <div class="three-grid">
+      <div class="content-card" style="border-top:3px solid var(--cyan);">
+        <h3 style="color:var(--cyan-soft);">Pre-commit Validation</h3>
+        <p>Configure custom agents that run before every commit to:</p>
+        <ul>
+          <li>Verify test coverage thresholds are met</li>
+          <li>Check for common anti-patterns</li>
+          <li>Validate API contract compliance</li>
+          <li>Ensure documentation is updated</li>
+        </ul>
+      </div>
+      <div class="content-card" style="border-top:3px solid var(--green);">
+        <h3 style="color:var(--green-soft);">PR Review Agents / Copilot Code Review</h3>
+        <p>Automated code review that catches issues humans miss:</p>
+        <ul>
+          <li>Security vulnerability detection</li>
+          <li>Performance regression analysis</li>
+          <li>Dependency compatibility checks</li>
+          <li>Style and convention enforcement</li>
+        </ul>
+      </div>
+      <div class="content-card" style="border-top:3px solid var(--purple);">
+        <h3 style="color:var(--purple);">Continuous Quality Gates</h3>
+        <p>Integrate Copilot into your quality pipeline:</p>
+        <ul>
+          <li>Auto-generate missing test cases for new code</li>
+          <li>Detect dead code and unused dependencies</li>
+          <li>Monitor code complexity metrics</li>
+          <li>Flag architectural boundary violations</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ SLIDE 22: Code Quality Workflows ════ -->
+  <div class="slide" data-slide="21">
+    <div class="page-num"></div>
+    <div class="page-tag"><span class="dot" style="background:var(--gold);box-shadow:0 0 8px var(--gold);"></span> Testing &amp; Validation</div>
+    <h1 class="headline" style="font-size:clamp(1.4rem,2.8vw,2.2rem); margin-bottom:24px;">Quality Automation Workflows</h1>
+
+    <div class="flow-steps" style="margin-bottom:16px;">
+      <div class="flow-step" style="position:relative;">
+        <div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:.7rem;color:#fff;background:var(--cyan);">1</div>
+        <h3>Write</h3>
+        <p>Developer writes code with Copilot assistance</p>
+      </div>
+      <div class="flow-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></div>
+      <div class="flow-step" style="position:relative;">
+        <div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:.7rem;color:#fff;background:var(--green);">2</div>
+        <h3>Validate</h3>
+        <p>Agent runs tests, linters, and security scans</p>
+      </div>
+      <div class="flow-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></div>
+      <div class="flow-step" style="position:relative;">
+        <div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:.7rem;color:#fff;background:var(--purple);">3</div>
+        <h3>Fix</h3>
+        <p>Copilot suggests fixes for failing checks</p>
+      </div>
+      <div class="flow-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></div>
+      <div class="flow-step" style="position:relative;">
+        <div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:.7rem;color:#fff;background:var(--gold);">4</div>
+        <h3>Ship</h3>
+        <p>Verified code merges with confidence</p>
+      </div>
+    </div>
+
+    <div class="flow-steps" style="margin-bottom:28px;align-items:stretch;">
+      <div class="flow-step" style="position:relative;border-top:3px solid var(--cyan);">
+        <h3>Design</h3>
+        <p>Component design principals, integrations, dependencies</p>
+      </div>
+      <div class="flow-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></div>
+      <div class="flow-step" style="position:relative;border-top:3px solid var(--green);">
+        <h3>Spec</h3>
+        <p>Concrete implementation details, data structures, libraries, etc.</p>
+      </div>
+      <div class="flow-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></div>
+      <div class="flow-step" style="position:relative;border-top:3px solid var(--purple);">
+        <h3>Implement</h3>
+        <p>Copilot writes the code to the spec</p>
+      </div>
+      <div class="flow-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></div>
+      <div class="flow-step" style="position:relative;border-top:3px solid var(--gold);">
+        <h3>Validate</h3>
+        <p>Validation Agent ensures implementation meets Spec, Spec adheres to Design, etc.</p>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div class="content-card">
+        <h3 style="color:var(--cyan-soft);">Deterministic Guardrails</h3>
+        <p>AI is probabilistic — your quality gates should be deterministic. Copilot works best when paired with:</p>
+        <ul>
+          <li>Strict type checking (TypeScript strict, mypy)</li>
+          <li>Automated linting with zero-tolerance rules</li>
+          <li>Required test coverage minimums</li>
+          <li>Security scanning (CodeQL, Dependabot)</li>
+        </ul>
+      </div>
+      <div class="content-card">
+        <h3 style="color:var(--green-soft);">Feedback Loops / Agentic Flywheel</h3>
+        <p>When AI-generated code fails a check, feed the error back to Copilot for iterative improvement:</p>
+        <ul>
+          <li>Log common AI mistakes in copilot-instructions.md</li>
+          <li>Create scoped instructions for error-prone modules</li>
+          <li>Track patterns of failure to improve prompt engineering</li>
+          <li>Use /clear between fix attempts to avoid context pollution</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════
+       SECTION 5: GitHub Actions & CI/CD Acceleration
+       ══════════════════════════════════════════════════ -->
+
+  <!-- ════ SLIDE 23: Section Intro ════ -->
+  <div class="slide" data-slide="22">
+    <div class="page-num"></div>
+    <div class="page-tag"><span class="dot" style="background:var(--teal);box-shadow:0 0 8px var(--teal);"></span> GitHub Actions</div>
+
+    <div class="section-header">
+      <h1>GitHub Actions &amp; <span style="color:var(--teal);">CI/CD</span> Acceleration</h1>
+      <p>How Copilot can help accelerate onboarding into GitHub Actions pipelines, including reusable workflow patterns and declarative YAML generation.</p>
+    </div>
+  </div>
+
+  <!-- ════ SLIDE 24: Reusable Workflow Patterns ════ -->
+  <div class="slide" data-slide="23">
+    <div class="page-num"></div>
+    <div class="page-tag"><span class="dot" style="background:var(--teal);box-shadow:0 0 8px var(--teal);"></span> GitHub Actions</div>
+    <h1 class="headline" style="font-size:clamp(1.4rem,2.8vw,2.2rem); margin-bottom:24px;">Reusable Workflow Patterns</h1>
+
+    <div class="three-grid">
+      <div class="content-card" style="border-top:3px solid var(--teal);">
+        <h3 style="color:var(--teal);">Starter Workflows</h3>
+        <p>Ask Copilot to scaffold production-ready workflows:</p>
+        <ul>
+          <li>CI pipelines (build, test, lint)</li>
+          <li>CD pipelines (deploy to staging/prod)</li>
+          <li>Release automation (semantic versioning, changelogs)</li>
+          <li>Security scanning (SAST, DAST, dependency audit)</li>
+        </ul>
+      </div>
+      <div class="content-card" style="border-top:3px solid var(--cyan);">
+        <h3 style="color:var(--cyan-soft);">Reusable Components</h3>
+        <p>Build composable workflow building blocks:</p>
+        <ul>
+          <li><b style="color:var(--text-0);">Composite actions</b> — Encapsulate common step sequences</li>
+          <li><b style="color:var(--text-0);">Reusable workflows</b> — Share entire pipelines via <code style="font-family:Consolas,monospace;font-size:.82rem;color:var(--cyan);">workflow_call</code></li>
+          <li><b style="color:var(--text-0);">Custom actions</b> — Package complex logic into versioned actions</li>
+          <li><b style="color:var(--text-0);">Matrix strategies</b> — Multi-platform/version testing</li>
+        </ul>
+      </div>
+      <div class="content-card" style="border-top:3px solid var(--green);">
+        <h3 style="color:var(--green-soft);">Organization Standards</h3>
+        <p>Establish pipeline conventions:</p>
+        <ul>
+          <li>Required status checks for protected branches</li>
+          <li>Standardized environment naming</li>
+          <li>Secret management patterns</li>
+          <li>Approval gates and deployment policies</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ SLIDE 25: YAML Generation ════ -->
+  <div class="slide" data-slide="24">
+    <div class="page-num"></div>
+    <div class="page-tag"><span class="dot" style="background:var(--teal);box-shadow:0 0 8px var(--teal);"></span> GitHub Actions</div>
+    <h1 class="headline" style="font-size:clamp(1.4rem,2.8vw,2.2rem); margin-bottom:24px;">Declarative YAML Generation</h1>
+
+    <div class="two-col">
+      <div class="content-card">
+        <h3 style="color:var(--teal);">Prompting for Workflows</h3>
+        <p>Effective prompts for GitHub Actions YAML:</p>
+        <ul>
+          <li><b style="color:var(--text-0);">"Create a CI workflow that..."</b> — Specify triggers, jobs, and required outputs</li>
+          <li><b style="color:var(--text-0);">"Add caching for..."</b> — Node modules, pip, Docker layers</li>
+          <li><b style="color:var(--text-0);">"Use environment protection rules..."</b> — For production deployments</li>
+          <li><b style="color:var(--text-0);">"Add concurrency controls..."</b> — Prevent parallel deployments</li>
+        </ul>
+        <div style="margin-top:16px;padding:14px 18px;background:var(--bg-2);border:1px solid var(--border-soft);border-radius:var(--r-md);font-family:Consolas,'Courier New',Courier,monospace;font-size:.75rem;line-height:1.6;color:var(--text-1);">
+          <span style="color:var(--green);"># Example prompt:</span><br/>
+          "Create a reusable workflow that builds a<br/>
+          Node.js app, runs tests with coverage, and<br/>
+          deploys to Azure if on main branch. Use<br/>
+          OIDC for authentication."
+        </div>
+      </div>
+      <div class="content-card">
+        <h3 style="color:var(--cyan-soft);">Best Practices</h3>
+        <ul>
+          <li><b style="color:var(--text-0);">Pin action versions</b> — Always use SHA-pinned actions for security (<code style="font-family:Consolas,monospace;font-size:.82rem;color:var(--cyan);">actions/checkout@v4</code> → full SHA)</li>
+          <li><b style="color:var(--text-0);">Minimize permissions</b> — Request only necessary <code style="font-family:Consolas,monospace;font-size:.82rem;color:var(--cyan);">permissions:</code> blocks</li>
+          <li><b style="color:var(--text-0);">Use OIDC over secrets</b> — For cloud provider authentication</li>
+          <li><b style="color:var(--text-0);">Document with comments</b> — Add YAML comments explaining non-obvious steps</li>
+          <li><b style="color:var(--text-0);">Implement timeouts</b> — Always set <code style="font-family:Consolas,monospace;font-size:.82rem;color:var(--cyan);">timeout-minutes</code> to prevent runaway jobs</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ SLIDE 26: Pipeline Onboarding ════ -->
+  <div class="slide" data-slide="25">
+    <div class="page-num"></div>
+    <div class="page-tag"><span class="dot" style="background:var(--teal);box-shadow:0 0 8px var(--teal);"></span> GitHub Actions</div>
+    <h1 class="headline" style="font-size:clamp(1.4rem,2.8vw,2.2rem); margin-bottom:24px;">Accelerating Pipeline Onboarding</h1>
+
+    <div class="two-col" style="margin-bottom:24px;">
+      <div class="content-card" style="border-top:3px solid var(--teal);">
+        <h3 style="color:var(--teal);">For New Teams</h3>
+        <ul>
+          <li>Use Copilot to generate starter workflows based on your tech stack description</li>
+          <li>Ask for workflow explanations: "Explain what each step does"</li>
+          <li>Generate workflow documentation and runbooks</li>
+          <li>Create troubleshooting guides for common CI failures</li>
+        </ul>
+      </div>
+      <div class="content-card" style="border-top:3px solid var(--gold);">
+        <h3 style="color:var(--gold);">For Migration</h3>
+        <ul>
+          <li>Convert Jenkins/Azure DevOps/CircleCI pipelines to GitHub Actions syntax</li>
+          <li>Map existing pipeline stages to Actions jobs and steps</li>
+          <li>Identify equivalent marketplace actions for custom scripts</li>
+          <li>Generate migration checklists and validation tests</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="content-card" style="max-width:1100px;border-left:3px solid var(--green);">
+      <h3 style="color:var(--green-soft);margin-bottom:12px;">Copilot + Actions = Continuous Improvement</h3>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;">
+        <div>
+          <p><b style="color:var(--text-0);">Diagnose failures</b></p>
+          <p>Paste CI error logs into Copilot to get targeted fix suggestions</p>
+        </div>
+        <div>
+          <p><b style="color:var(--text-0);">Optimize performance</b></p>
+          <p>Ask Copilot to add caching, parallelism, and conditional execution</p>
+        </div>
+        <div>
+          <p><b style="color:var(--text-0);">Evolve pipelines</b></p>
+          <p>Iteratively add deployment stages, notifications, and monitoring hooks</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ SLIDE 27: Presentation Process ════ -->
+  <div class="slide" data-slide="26">
+    <div class="page-num"></div>
+    <div class="page-tag"><span class="dot" style="background:var(--purple);box-shadow:0 0 8px var(--purple);"></span> Process</div>
+    <h1 class="headline" style="font-size:clamp(1.4rem,2.8vw,2.2rem); margin-bottom:24px;">Presentation Process</h1>
+
+    <div class="checklist">
+      <div class="checklist-item">
+        <div class="icon safe">1</div>
+        <div>
+          <h4>Create thought outline</h4>
+          <p>Describe the content, format, talking points, etc. for each slide</p>
+        </div>
+      </div>
+      <div class="checklist-item">
+        <div class="icon safe">2</div>
+        <div>
+          <h4>Include relevant references</h4>
+          <p>Images, example presentations, .ppt slides, etc.</p>
+        </div>
+      </div>
+      <div class="checklist-item">
+        <div class="icon safe">3</div>
+        <div>
+          <h4>Save thought outline to a prompt file</h4>
+          <p>Persist your outline so it can be used as structured input for generation</p>
+        </div>
+      </div>
+      <div class="checklist-item">
+        <div class="icon safe">4</div>
+        <div>
+          <h4>Instruct GHCP CLI to build a presentation</h4>
+          <p>Generate a presentation to your style based on the prompt file</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ SLIDE 28: Q&A ════ -->
+  <div class="slide" data-slide="27">
+    <div class="page-num"></div>
+    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;text-align:center;">
+      <h1 class="headline" style="font-size:clamp(3rem,8vw,6rem);margin-bottom:24px;">Q<span style="color:var(--cyan);">&amp;</span>A</h1>
+      <p style="color:var(--text-2);font-size:1.2rem;max-width:500px;">Thank you! Questions, comments, or discussion?</p>
+    </div>
+  </div>
+
+</div>
+
+<!-- ── Bottom nav ───────────────────────────────── -->
+<div class="arrow-nav">
+  <button class="arrow-btn" id="prev" disabled>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+  </button>
+  <span class="page-indicator" id="pageInd">1 / 26</span>
+  <button class="arrow-btn" id="next">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+  </button>
+</div>
+
+<div class="key-hint"><kbd>&#8592;</kbd> <kbd>&#8594;</kbd> navigate &nbsp; <kbd>Space</kbd> next</div>
+
+<script>
+(() => {
+  const slides = document.querySelectorAll('.slide');
+  const total  = slides.length;
+  let cur = 0;
+
+  const prevBtn  = document.getElementById('prev');
+  const nextBtn  = document.getElementById('next');
+  const pageInd  = document.getElementById('pageInd');
+  const progFill = document.getElementById('progressFill');
+  const rail     = document.getElementById('rail');
+
+  // Build rail dots
+  const railLabels = [
+    'Agenda','Brownfield','Specs','Introspection','Safe Patterns',
+    'Guardrails','Prompt Safety','Tool Safety','AI Controls',
+    'Context Eng.','Gambling','Context Rule','Two Levers',
+    'Your Prompt','R→P→I','Agent Configs','Power Users','5 Things',
+    'Testing','Unit Tests','Validation','Quality Flow',
+    'Actions','Workflows','YAML Gen','Onboarding','Pres. Process','Q&A'
+  ];
+  railLabels.forEach((label, i) => {
+    const a = document.createElement('a');
+    a.dataset.idx = i;
+    a.dataset.label = label;
+    if (i === 0) a.classList.add('active');
+    a.addEventListener('click', () => go(i));
+    rail.appendChild(a);
+  });
+  const railDots = rail.querySelectorAll('a');
+
+  // Update page numbers dynamically
+  slides.forEach((s, i) => {
+    const pn = s.querySelector('.page-num');
+    if (pn) pn.textContent = String(i + 1).padStart(2, '0') + ' / ' + String(total).padStart(2, '0');
+  });
+
+  function go(idx) {
+    if (idx < 0 || idx >= total || idx === cur) return;
+    const dir = idx > cur ? 1 : -1;
+    const prev = cur;
+
+    slides[prev].classList.remove('active');
+    slides[prev].classList.add(dir > 0 ? 'exit-left' : 'exit-right');
+
+    cur = idx;
+    slides[cur].style.transition = 'none';
+    slides[cur].style.transform = dir > 0 ? 'translateX(60px)' : 'translateX(-60px)';
+    slides[cur].style.opacity = '0';
+    void slides[cur].offsetWidth;
+    slides[cur].style.transition = '';
+    slides[cur].style.transform = '';
+    slides[cur].style.opacity = '';
+    slides[cur].classList.add('active');
+
+    setTimeout(() => {
+      slides[prev].classList.remove('exit-left', 'exit-right');
+    }, 500);
+
+    prevBtn.disabled = cur === 0;
+    nextBtn.disabled = cur === total - 1;
+    pageInd.textContent = (cur + 1) + ' / ' + total;
+    progFill.style.width = ((cur + 1) / total * 100) + '%';
+
+    railDots.forEach(d => d.classList.toggle('active', +d.dataset.idx === cur));
+  }
+
+  // Expose globally for brand link
+  window.goToSlide = go;
+
+  prevBtn.addEventListener('click', () => go(cur - 1));
+  nextBtn.addEventListener('click', () => go(cur + 1));
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); go(cur + 1); }
+    if (e.key === 'ArrowLeft') { e.preventDefault(); go(cur - 1); }
+    if (e.key === 'Home') { e.preventDefault(); go(0); }
+    if (e.key === 'End') { e.preventDefault(); go(total - 1); }
+  });
+
+  let tx = 0;
+  document.addEventListener('touchstart', e => { tx = e.touches[0].clientX; });
+  document.addEventListener('touchend', e => {
+    const dx = e.changedTouches[0].clientX - tx;
+    if (Math.abs(dx) > 50) go(cur + (dx < 0 ? 1 : -1));
+  });
+
+  // Agenda item click
+  document.querySelectorAll('.agenda-item[data-goto]').forEach(item => {
+    item.addEventListener('click', () => go(+item.dataset.goto));
+  });
+
+  // Initial state
+  pageInd.textContent = '1 / ' + total;
+  progFill.style.width = (1 / total * 100) + '%';
+})();
+</script>
+</body>
+</html>
