@@ -104,6 +104,15 @@ Write raw response to JSON:
 - `-ApiBase`: API base URL (default: `https://api.github.com`).
 - `-ApiVersion`: GitHub API version header (default in script: `2026-03-10`).
 
+## API Endpoints Used
+
+| Endpoint | Purpose | When Called |
+|----------|---------|-------------|
+| `GET /enterprises/{enterprise}/settings/billing/ai_credit/usage` | Retrieves AI credit usage for the enterprise, with optional `year`, `month`, `day`, `user`, and `model` query filters | Every run (aggregate mode) or once per user (per-user mode) |
+| `GET /enterprises/{enterprise}/copilot/billing/seats` | Lists all Copilot licensed seats in the enterprise (paginated) | Only when `-PerUser` is specified, to enumerate user logins before querying usage per user |
+
+Reference: [GitHub REST API docs — Billing](https://docs.github.com/en/rest/enterprise-admin/billing)
+
 ## Notes
 
 - The script intentionally does not expose an organization filter and is focused on enterprise-level licensing scenarios.
