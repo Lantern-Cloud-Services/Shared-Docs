@@ -8,7 +8,7 @@ This is a documentation and presentation knowledge base. It contains `.pptx` sou
 
 The main authoring pattern is:
 
-1. A `prompt.txt` file describes the desired deck (slide-by-slide content, layout, talking points).
+1. A `prompt.md` or `prompt.txt` file describes the desired deck (slide-by-slide content, layout, talking points). Both are supported; prefer `prompt.md` when the spec benefits from structured Markdown (headings, tables, `[VERBATIM]`/`[NEW]` slide tags).
 2. Reference materials (`.pptx` slides, exported images, existing HTML decks) provide visual targets.
 3. The output is a self-contained HTML file with slide navigation, dark-mode theming, and responsive layout.
 
