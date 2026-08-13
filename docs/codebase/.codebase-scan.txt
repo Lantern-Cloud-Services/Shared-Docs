@@ -1,0 +1,220 @@
+
+=== DIRECTORY TREE (max depth 3, source files only) ===
+.github
+.github\Agentic Primitives
+.github\Agentic Primitives\security-reviewer.agent.md
+.github\agents
+.github\copilot-instructions.md
+.github\skills
+.github\skills\acquire-codebase-knowledge
+.github\skills\acquire-codebase-knowledge\assets
+.github\skills\acquire-codebase-knowledge\references
+.github\skills\acquire-codebase-knowledge\scripts
+.github\skills\acquire-codebase-knowledge\SKILL.md
+.gitignore
+Agentic DevOps
+Agentic DevOps\Agentic DevOps L100 deck Features.pptx
+Agentic DevOps\GHCP features and Agentic DevOps V2.pptx
+DevOps Basics
+DevOps Basics\Accelerating innovation with DevOps (MS Story) - short.pptx
+docs
+docs\codebase
+docs\codebase\.codebase-scan.txt
+engagements
+engagements\20260519_trinet_ghcp_metrics
+engagements\20260519_trinet_ghcp_metrics\assets
+engagements\20260519_trinet_ghcp_metrics\assets\leader.png
+engagements\20260519_trinet_ghcp_metrics\assets\overview.png
+engagements\20260519_trinet_ghcp_metrics\assets\PR.png
+engagements\20260519_trinet_ghcp_metrics\Copilot_KPIs_v4.html
+engagements\20260519_trinet_ghcp_metrics\reference
+engagements\20260519_trinet_ghcp_metrics\reference\ghcp_champions_cli.html
+engagements\AON_Metrics
+engagements\AON_Metrics\COPILOT_AI_CREDIT_API_REFERENCE.md
+engagements\AON_Metrics\Get-CopilotAICreditUsage.ps1
+engagements\AON_Metrics\presentation.html
+engagements\AON_Metrics\README.md
+engagements\Berkely_ghcp_best_practices
+engagements\Berkely_ghcp_best_practices\Agent Quality and Token Optimization_cust.PPTX
+engagements\Berkely_ghcp_best_practices\assets
+engagements\Berkely_ghcp_best_practices\assets\ModelSelection.png
+engagements\Berkely_ghcp_best_practices\GHCP_best_practices.html
+engagements\Berkely_ghcp_best_practices\GHCP_best_practices_v2.html
+engagements\Berkely_ghcp_best_practices\GHCP_strategic_enablement.html
+engagements\Berkely_ghcp_best_practices\prompt.txt
+engagements\calpers_primitives
+engagements\calpers_primitives\.vscode
+engagements\calpers_primitives\.vscode\settings.json
+engagements\calpers_primitives\code-search-analysis_SKILL.md
+engagements\calpers_primitives\code-search-analysis_SKILL.md.pdf
+engagements\calpers_primitives\content_placement_report.md
+engagements\calpers_primitives\copilot instructions.md
+engagements\calpers_primitives\copilot instructions.pdf
+engagements\calpers_primitives\uid-traceability_SKILL.md
+engagements\calpers_primitives\uid-traceability_SKILL.md.pdf
+engagements\HanoverGHCP
+engagements\HanoverGHCP_champions
+engagements\HanoverGHCP_champions\assets
+engagements\HanoverGHCP_champions\assets\copilot-models-cli.html
+engagements\HanoverGHCP_champions\assets\copilot-models-tabbed.html
+engagements\HanoverGHCP_champions\assets\flywheel_box.png
+engagements\HanoverGHCP_champions\ghcp_champions.html
+engagements\HanoverGHCP_champions\ghcp_champions_cli.html
+engagements\HanoverGHCP_champions\prompt.md
+engagements\HanoverGHCP_champions\prompt.txt
+engagements\HanoverGHCP_champions\source
+engagements\HanoverGHCP_champions\source\GHCP_best_practices_v2.html
+engagements\HanoverGHCP_champions\source\GHCP_strategic_enablement.html
+engagements\HanoverGHCP_SandBoxing_SDD
+engagements\HanoverGHCP_SandBoxing_SDD\assets
+engagements\HanoverGHCP_SandBoxing_SDD\assets\app.png
+engagements\HanoverGHCP_SandBoxing_SDD\ghcp_sandbox_sdd_cli.html
+engagements\HanoverGHCP_SandBoxing_SDD\prompt.txt
+engagements\HanoverGHCP_SandBoxing_SDD\source
+engagements\HanoverGHCP_SandBoxing_SDD\source\ghcp_champions_cli.html
+External Presentations
+External Presentations\CU AI.pptx
+External Presentations\dps career.pptx
+FutureDev
+FutureDev\Day in the Life of a Next Gen Developer - Demo Deck - reduced.PPTX
+GHCP Optimization
+GHCP Optimization\advancedContextEngineering_reduced.pptx
+GHCP Strategic Enablement
+GHCP Strategic Enablement\assets
+GHCP Strategic Enablement\assets\adoption1.png
+GHCP Strategic Enablement\assets\adoption2.png
+GHCP Strategic Enablement\assets\copilot-models-tabbed.html
+GHCP Strategic Enablement\assets\flywheel_box.png
+GHCP Strategic Enablement\assets\ModelSelection.png
+GHCP Strategic Enablement\assets\slide1_export.png
+GHCP Strategic Enablement\assets\slide6_export.png
+GHCP Strategic Enablement\GHCP_strategic_enablement.html
+GHCP Strategic Enablement\TALK_TRACK.md
+GitHub Copilot
+GitHub Copilot\2024-04-23-GitHub-CCI-LP-Copilot-Impact-Survey-NT-V003.pdf
+GitHub Copilot\BestPractice_Opt_GR_CICD
+GitHub Copilot\BestPractice_Opt_GR_CICD\assets
+GitHub Copilot\BestPractice_Opt_GR_CICD\assets\ModelSelection.png
+GitHub Copilot\BestPractice_Opt_GR_CICD\GHCP_best_practices_v2.html
+GitHub Copilot\Copilot - InDepth Guidance for Measuring Adoption & Clarifying Impact.pptx
+GitHub Copilot\Copilot Calculator_original.xlsx
+GitHub Copilot\Copilot_KPIs.2.pptx
+GitHub Copilot\Introducing the SPACE framework - external.pptx
+GitHub Copilot\Realizing The Value of GitHub Copilot.pdf
+GitHub Copilot\Usage
+GitHub Copilot\Usage\AIUsageByEnterpriseUser
+GitHub Copilot\Usage\AIUsageByEnterpriseUser\Get-CopilotAICreditUsage.ps1
+GitHub Copilot\Usage\AIUsageByEnterpriseUser\README.md
+Platform Engineering
+Platform Engineering\MS Platform Engineering_reduced.pptx
+Platform Engineering\Platform Engineering Walk In - short ext.pptx
+Platform Engineering\Platform Engineering Walk In 202508 - short.pptx
+Rapid Prototyping
+Rapid Prototyping\ChatOps RP 20241023.pptx
+README.md
+
+=== STACK DETECTION (manifest files) ===
+No recognized manifest files found in project root.
+
+=== ENTRY POINTS ===
+No common entry points found. Check 'main' or 'scripts.start' in manifest files above.
+
+=== LINTING AND FORMATTING CONFIG ===
+No linting or formatting config files found in project root.
+
+=== ENVIRONMENT VARIABLE TEMPLATES ===
+No .env.example or .env.template found. Identify required environment variables by searching the code and config for environment variable reads.
+
+=== TODO / FIXME / HACK (production code only, test dirs excluded) ===
+.github\skills\acquire-codebase-knowledge\scripts\scan.py:28: TODO_LIMIT = 60
+.github\skills\acquire-codebase-knowledge\scripts\scan.py:291: """Search for TODO/FIXME/HACK comments."""
+.github\skills\acquire-codebase-knowledge\scripts\scan.py:291: """Search for TODO/FIXME/HACK comments."""
+.github\skills\acquire-codebase-knowledge\scripts\scan.py:291: """Search for TODO/FIXME/HACK comments."""
+.github\skills\acquire-codebase-knowledge\scripts\scan.py:293: patterns = ["TODO", "FIXME", "HACK"]
+.github\skills\acquire-codebase-knowledge\scripts\scan.py:293: patterns = ["TODO", "FIXME", "HACK"]
+.github\skills\acquire-codebase-knowledge\scripts\scan.py:293: patterns = ["TODO", "FIXME", "HACK"]
+.github\skills\acquire-codebase-knowledge\scripts\scan.py:320: return todos[:TODO_LIMIT]
+.github\skills\acquire-codebase-knowledge\scripts\scan.py:617: # TODOs
+.github\skills\acquire-codebase-knowledge\scripts\scan.py:620: print_section("TODO / FIXME / HACK (production code only, test dirs excluded)", todos, output_file)
+.github\skills\acquire-codebase-knowledge\scripts\scan.py:620: print_section("TODO / FIXME / HACK (production code only, test dirs excluded)", todos, output_file)
+.github\skills\acquire-codebase-knowledge\scripts\scan.py:620: print_section("TODO / FIXME / HACK (production code only, test dirs excluded)", todos, output_file)
+.github\skills\acquire-codebase-knowledge\scripts\scan.py:622: print_section("TODO / FIXME / HACK (production code only, test dirs excluded)", ["None found."], output_file)
+.github\skills\acquire-codebase-knowledge\scripts\scan.py:622: print_section("TODO / FIXME / HACK (production code only, test dirs excluded)", ["None found."], output_file)
+.github\skills\acquire-codebase-knowledge\scripts\scan.py:622: print_section("TODO / FIXME / HACK (production code only, test dirs excluded)", ["None found."], output_file)
+
+=== GIT RECENT COMMITS (last 20) ===
+2682513 copilot instructions
+7fb4ebb update gitignore
+b0770d6 Merge pull request #3 from Lantern-Cloud-Services/jdvcdev-add-copilot-instructions
+62e2237 Add .github/copilot-instructions.md with project conventions
+aa43841 Merge pull request #2 from Lantern-Cloud-Services/copilot/add-api-points-to-readme
+8b0304f Add API Endpoints Used section to README
+db81276 BP initial commit
+44dc621 AIEnterpriseUsage
+3479188 GHCP strat enablement initial commit.
+7446074 permissions
+3d6098f updtes
+6ca5712 updates
+9ca8708 added optimization
+faae686 update permissions
+bc2ac81 Github KPIs
+c24ffcd Future Dev
+8a645c4 dps commit
+82ed5bc updated GA/preview
+f367bdc Merge branch 'main' of https://github.com/Lantern-Cloud-Services/Shared-Docs
+c592a16 updated naming conventions
+
+=== HIGH-CHURN FILES (last 90 days, top 20) ===
+   3 .gitignore
+   3 GHCP Optimization/advancedContextEngineering_reduced.pptx
+   2 .github/copilot-instructions.md
+   2 GitHub Copilot/Usage/AIUsageByEnterpriseUser/README.md
+   1 GitHub Copilot/BestPractice_Opt_GR_CICD/GHCP_best_practices_v2.html
+   1 GitHub Copilot/BestPractice_Opt_GR_CICD/assets/ModelSelection.png
+   1 GitHub Copilot/Usage/AIUsageByEnterpriseUser/Get-CopilotAICreditUsage.ps1
+   1 GHCP Strategic Enablement/GHCP_strategic_enablement.html
+   1 GHCP Strategic Enablement/TALK_TRACK.md
+   1 GHCP Strategic Enablement/assets/ModelSelection.png
+   1 GHCP Strategic Enablement/assets/adoption1.png
+   1 GHCP Strategic Enablement/assets/adoption2.png
+   1 GHCP Strategic Enablement/assets/copilot-models-tabbed.html
+   1 GHCP Strategic Enablement/assets/flywheel_box.png
+   1 GHCP Strategic Enablement/assets/slide1_export.png
+   1 GHCP Strategic Enablement/assets/slide6_export.png
+
+=== MONOREPO SIGNALS ===
+No monorepo signals detected.
+
+=== CODE METRICS ===
+Total files scanned: 81
+Total lines of code: 719
+
+Files by language:
+  Other: 80
+  Python: 1
+
+Top 10 largest files:
+Agentic DevOps\GHCP features and Agentic DevOps V2.pptx: 79072.2KB
+FutureDev\Day in the Life of a Next Gen Developer - Demo Deck - reduced.PPTX: 67505.9KB
+External Presentations\CU AI.pptx: 60904.9KB
+External Presentations\dps career.pptx: 59549.6KB
+GitHub Copilot\2024-04-23-GitHub-CCI-LP-Copilot-Impact-Survey-NT-V003.pdf: 59427.9KB
+DevOps Basics\Accelerating innovation with DevOps (MS Story) - short.pptx: 45724.7KB
+Platform Engineering\Platform Engineering Walk In - short ext.pptx: 45495.4KB
+Platform Engineering\Platform Engineering Walk In 202508 - short.pptx: 45495.4KB
+Agentic DevOps\Agentic DevOps L100 deck Features.pptx: 35119.2KB
+Rapid Prototyping\ChatOps RP 20241023.pptx: 33942.7KB
+
+=== CI/CD PIPELINES ===
+No CI/CD pipelines detected.
+
+=== CONTAINERS & ORCHESTRATION ===
+No containerization configs detected.
+
+=== SECURITY & COMPLIANCE ===
+No security configs detected.
+
+=== PERFORMANCE & TESTING ===
+No performance testing configs detected.
+
+=== SCAN COMPLETE ===
